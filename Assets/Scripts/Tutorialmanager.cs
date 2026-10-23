@@ -1,61 +1,42 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.InputSystem;
 
 namespace RhythmWitchClone.Gameplay
 {
     /// <summary>
-    /// Tutorial-Dialog-System: zeigt eine Liste von Text-Schritten nacheinander an, jeweils
-    /// Buchstabe für Buchstabe animiert ("Schreibmaschinen-Effekt"). Zwei Arten, wie ein Schritt
-    /// weitergeht:
-    /// - "Press E": normaler Fortschritt per Taste - erster Druck während des Schreibens zeigt
-    ///   sofort den kompletten Text, ein weiterer Druck springt zum nächsten Schritt.
-    /// - "Wait For Movement": wartet auf tatsächliche WASD-Eingabe (z.B. für "Probier die
-    ///   Bewegung aus") - schaltet dafür automatisch die Spieler-Bewegung frei, die davor
-    ///   gesperrt ist, und springt automatisch weiter, sobald sich der Spieler bewegt.
-    /// - "Move To Area": zeigt einen Pfeil über dem Spieler, der zur Mitte einer unsichtbaren
-    ///   Ziel-Zone ("Target Area", per Transform in der Szene platziert) zeigt - kein echter
-    ///   Trigger-Collider nötig, reiner Abstandsvergleich. Springt automatisch weiter, sobald
-    ///   der Spieler nah genug an der Zone ist ("Target Area Radius").
-    /// - "Wait For Enemy Defeat": wartet, bis der bei "Enemy To Defeat" eingetragene Gegner
-    ///   besiegt wurde (springt automatisch weiter, sobald er zerstört ist).
-    /// - "Wait For Full Health": wartet, bis der Spieler wieder auf voller Gesundheit ist (z.B.
-    ///   damit er die Heilung der Verteidigungskarte einmal selbst ausprobiert).
-    /// - "Finish": letzter Schritt - der Text wird ganz normal angezeigt UND gleichzeitig das
-    ///   Level-Win-Panel (aus PlayerController) geöffnet. E überspringt nur noch den Schreib-
-    ///   Effekt, schaltet aber nicht weiter - der Spieler verlässt das Tutorial über den
-    ///   "Zurück zum Menü"-Button des Win-Panels, der wie gewohnt in die Safe Zone führt.
+    /// Intro + Tutorial-Dialog-System der Tutorial-Szene.
     ///
-    /// Zusätzlich pro Schritt möglich: "Damage To Apply On Show" fügt dem Spieler sofort Schaden
-    /// zu (praktisch kombiniert mit "Ui Elements To Reveal", um z.B. gleichzeitig die HP-Leiste
-    /// einzublenden).
+    /// INTRO (läuft vor dem Tutorial):
+    /// - Vollbild-Panel mit Text unten (Schreibmaschinen-Effekt) und oben beliebig vielen Bildern
+    ///   pro Abschnitt, die automatisch nebeneinander angeordnet und sanft eingeblendet werden.
     ///
-    /// Jeder Schritt kann zusätzlich ein Marker-Objekt kurzzeitig ein-/ausblenden (z.B. ein Pfeil)
-    /// UND/ODER UI-Elemente DAUERHAFT einblenden (z.B. HP-Leiste, Mana-Leiste, Karten) - so kann
-    /// der Canvas am Anfang komplett leer sein (außer dem Dialogtext) und im Lauf des Tutorials
-    /// nach und nach "aufploppen".
+    /// Jeder Tutorial-Schritt kann das Dialog-Panel zu einem Platzhalter im Canvas wandern lassen
+    /// ("Dialogue Panel Position"), damit es dort steht, wo der Schritt gerade etwas erklärt.
+    /// - Linksklick: erster Klick während des Schreibens zeigt sofort den ganzen Text, nächster
+    ///   Klick geht zum nächsten Abschnitt. Kleiner Klick-Cooldown gegen versehentliche Doppelklicks.
+    /// - Nach dem letzten Abschnitt verschwindet das Intro-Panel und das Tutorial startet.
     ///
-    /// Setup:
-    /// - Kommt auf ein beliebiges GameObject in der Tutorial-Szene (z.B. ein leeres
-    ///   "TutorialManager"-Objekt).
-    /// - "Player": dein Player-GameObject, für die Bewegungs-Sperre.
-    /// - "Steps": Liste im Inspector - pro Eintrag Text, Fortschritts-Art, optional Marker und
-    ///   eine Liste an UI-Elementen, die ab diesem Schritt dauerhaft eingeblendet werden.
-    /// - "Dialogue Panel": das UI-Panel, das den Dialog umrahmt (wird ein-/ausgeblendet).
-    /// - "Dialogue Text": das TextMeshProUGUI-Objekt, in dem der Text erscheint.
-    /// - "Continue Prompt UI": optional, ein kleiner "E"-Tastenhinweis, der nur bei "Press E"-
-    ///   Schritten erscheint, sobald der aktuelle Text fertig geschrieben ist.
+    /// TUTORIAL - Arten, wie ein Schritt weitergeht:
+    /// - "Click To Continue": Linksklick - erster Klick während des Schreibens zeigt sofort den
+    ///   kompletten Text, ein weiterer Klick springt zum nächsten Schritt.
+    /// - "Wait For Movement": wartet auf WASD-Eingabe.
+    /// - "Move To Area": Pfeil um den Spieler zeigt zur Ziel-Zone, weiter sobald erreicht.
+    /// - "Wait For Enemy Defeat": wartet, bis der eingetragene Gegner besiegt ist.
+    /// - "Wait For Full Health": wartet, bis der Spieler wieder volle HP hat.
+    /// - "Finish": Text + Level-Win-Panel gleichzeitig; Klick überspringt nur noch den Schreib-Effekt.
     ///
-    /// Wichtig: Alle UI-Elemente, die erst "aufploppen" sollen (HP-Leiste, Mana-Leiste, Karten,
-    /// etc.), müssen in der Tutorial-Szene selbst standardmäßig DEAKTIVIERT sein (Checkbox aus) -
-    /// das Script blendet sie nur zum passenden Zeitpunkt ein, deaktiviert sie aber nie wieder.
+    /// Klicks auf Buttons (z.B. Pause-Menü, Win-Panel) zählen NICHT als "Weiter"-Klick, und bei
+    /// pausiertem Spiel wird nichts weitergeschaltet.
     /// </summary>
     public class TutorialManager : MonoBehaviour
     {
         public enum StepAdvanceMode
         {
-            PressE,
+            ClickToContinue,
             WaitForMovement,
             MoveToArea,
             WaitForEnemyDefeat,
@@ -64,26 +45,37 @@ namespace RhythmWitchClone.Gameplay
         }
 
         [System.Serializable]
+        public class IntroSlide
+        {
+            [TextArea(2, 6)]
+            public string text;
+            [Tooltip("Bilder, die oben nebeneinander angezeigt werden, sobald dieser Abschnitt beginnt (werden automatisch im Container angeordnet). Leere Liste = die Bilder vom vorherigen Abschnitt bleiben stehen.")]
+            public List<Sprite> images = new List<Sprite>();
+        }
+
+        [System.Serializable]
         public class TutorialStep
         {
             [TextArea(2, 5)]
             public string text;
-            public StepAdvanceMode advanceMode = StepAdvanceMode.PressE;
+            public StepAdvanceMode advanceMode = StepAdvanceMode.ClickToContinue;
+            [Tooltip("Optional: Platzhalter im Canvas (leeres UI-Objekt), zu dem das Dialog-Panel bei diesem Schritt hinwandert. Leer = Panel bleibt, wo es gerade ist.")]
+            public RectTransform dialoguePanelPosition;
             [Tooltip("Schaltet die Spieler-Bewegung frei, sobald dieser Schritt gezeigt wird (z.B. für 'Probier WASD aus').")]
             public bool unlocksMovement;
-            [Tooltip("Fügt dem Spieler sofort diesen Schaden zu, sobald dieser Schritt gezeigt wird (0 = kein Schaden). Praktisch kombiniert mit 'Ui Elements To Reveal', um z.B. gleichzeitig die HP-Leiste einzublenden.")]
+            [Tooltip("Fügt dem Spieler sofort diesen Schaden zu, sobald dieser Schritt gezeigt wird (0 = kein Schaden).")]
             public int damageToApplyOnShow;
-            [Tooltip("Optional: ein Objekt in der Szene, das NUR WÄHREND dieses Schritts ein-/ausgeblendet wird (z.B. Pfeil, Rahmen, Spotlight, oder ein kurzer 'wirft etwas'-Effekt).")]
+            [Tooltip("Optional: ein Objekt in der Szene, das NUR WÄHREND dieses Schritts eingeblendet wird.")]
             public GameObject marker;
-            [Tooltip("UI-Elemente, die ab diesem Schritt DAUERHAFT eingeblendet werden (z.B. HP-Leiste) - bleiben danach sichtbar, anders als der Marker.")]
+            [Tooltip("UI-Elemente, die ab diesem Schritt DAUERHAFT eingeblendet werden (z.B. HP-Leiste).")]
             public List<GameObject> uiElementsToReveal = new List<GameObject>();
-            [Tooltip("Nur für 'Move To Area': Objekt in der Szene, dessen Position die Mitte der unsichtbaren Ziel-Zone markiert.")]
+            [Tooltip("Nur für 'Move To Area': Objekt in der Szene, dessen Position die Mitte der Ziel-Zone markiert.")]
             public Transform targetArea;
-            [Tooltip("Nur für 'Move To Area': Radius der Zone in Weltraum-Einheiten - näher als das gilt als 'erreicht'.")]
+            [Tooltip("Nur für 'Move To Area': Radius der Zone - näher als das gilt als 'erreicht'.")]
             public float targetAreaRadius = 1.5f;
-            [Tooltip("Nur für 'Wait For Enemy Defeat': der Gegner, der besiegt werden muss, bevor es weitergeht.")]
+            [Tooltip("Nur für 'Wait For Enemy Defeat': der Gegner, der besiegt werden muss.")]
             public EnemyController enemyToDefeat;
-            [Tooltip("Nur für 'Wait For Enemy Defeat': Bild, das der Gegner beim Tod auf den Spieler wirft (leer lassen für keinen Wurf-Effekt).")]
+            [Tooltip("Nur für 'Wait For Enemy Defeat': Bild, das der Gegner beim Tod auf den Spieler wirft (leer = kein Wurf).")]
             public Sprite thrownObjectSprite;
             [Tooltip("Schaden, den der geworfene Gegenstand beim Einschlag verursacht.")]
             public int thrownObjectDamage;
@@ -93,11 +85,24 @@ namespace RhythmWitchClone.Gameplay
 
         [Header("Referenzen")]
         [SerializeField] private PlayerController player;
-        [Tooltip("Pfeil-Objekt in der Szene (Sprite/Quad mit Pfeil-Textur, nach 'oben' zeigend gezeichnet), das bei 'Move To Area'-Schritten um den Spieler herum kreist und zur Ziel-Zone zeigt.")]
+        [Tooltip("Pfeil-Objekt in der Szene, das bei 'Move To Area'-Schritten um den Spieler kreist und zur Ziel-Zone zeigt.")]
         [SerializeField] private Transform guideArrow;
         [SerializeField] private float guideArrowHeightOffset = 1f;
-        [Tooltip("Wie weit der Pfeil vom Spieler entfernt kreist (in Richtung der Ziel-Zone) - wie ein Uhrzeiger um den Spieler herum.")]
         [SerializeField] private float guideArrowOrbitRadius = 1.5f;
+
+        [Header("Intro (Vorgeschichte)")]
+        [Tooltip("Abschnitte des Intros, der Reihe nach. Leere Liste = kein Intro, Tutorial startet direkt.")]
+        [SerializeField] private List<IntroSlide> introSlides = new List<IntroSlide>();
+        [Tooltip("Vollbild-Panel des Intros (UI -> Panel).")]
+        [SerializeField] private GameObject introPanel;
+        [Tooltip("Container oben im Intro mit Horizontal Layout Group - darin werden die Bilder eines Abschnitts automatisch nebeneinander angeordnet.")]
+        [SerializeField] private RectTransform introImageContainer;
+        [Tooltip("Text unten im Intro (UI -> Text - TextMeshPro).")]
+        [SerializeField] private TMP_Text introText;
+        [Tooltip("Optional: 'Fortfahren mit Linker Maustaste'-Hinweis im Intro, erscheint wenn der Text fertig ist.")]
+        [SerializeField] private GameObject introContinuePrompt;
+        [Tooltip("Wie lange neue Intro-Bilder zum Einblenden brauchen (Sekunden).")]
+        [SerializeField] private float introImageFadeDuration = 0.5f;
 
         [Header("Schritte")]
         [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
@@ -105,18 +110,30 @@ namespace RhythmWitchClone.Gameplay
         [Header("UI")]
         [SerializeField] private GameObject dialoguePanel;
         [SerializeField] private TMP_Text dialogueText;
-        [Tooltip("Erscheint nur bei 'Press E'-Schritten, sobald der aktuelle Text fertig geschrieben ist.")]
+        [Tooltip("'Fortfahren mit Linker Maustaste'-Hinweis - erscheint nur bei 'Click To Continue'-Schritten, sobald der Text fertig geschrieben ist.")]
         [SerializeField] private GameObject continuePromptUI;
+        [Tooltip("Wie schnell das Dialog-Panel zu seiner neuen Position wandert (0 = springt sofort).")]
+        [SerializeField] private float dialoguePanelMoveSpeed = 8f;
 
-        [Header("Schreibmaschinen-Effekt")]
+        [Header("Schreibmaschinen-Effekt / Klick")]
         [SerializeField] private float charactersPerSecond = 30f;
+        [Tooltip("Mindestabstand zwischen zwei gezählten Klicks (Sekunden) - verhindert versehentliches Doppelklicken.")]
+        [SerializeField] private float clickCooldown = 0.25f;
 
         private int _currentStepIndex = -1;
         private bool _isTyping;
         private string _currentFullText = "";
         private int _visibleCharacterCount;
         private float _typeTimer;
+        private TMP_Text _activeText;
+        private float _nextClickAllowedTime;
         private Vector3 _lastKnownEnemyPosition;
+
+        private bool _inIntro;
+        private int _currentIntroIndex = -1;
+        private float _introImageFadeTimer;
+        private readonly List<Image> _currentIntroImages = new List<Image>();
+        private RectTransform _dialoguePanelTarget;
 
         private class ThrownObject
         {
@@ -132,19 +149,34 @@ namespace RhythmWitchClone.Gameplay
         private void Start()
         {
             if (dialoguePanel != null) dialoguePanel.SetActive(false);
+            if (continuePromptUI != null) continuePromptUI.SetActive(false);
             HideAllMarkers();
 
-            // Bewegung ist zu Beginn des Tutorials gesperrt - wird erst durch einen Schritt mit
-            // "Unlocks Movement" wieder freigeschaltet.
+            // Bewegung ist zu Beginn gesperrt - wird erst durch einen Schritt mit "Unlocks Movement" freigeschaltet.
             if (player != null) player.SetMovementLocked(true);
 
-            ShowStep(0);
+            if (introSlides.Count > 0 && introPanel != null)
+            {
+                StartIntro();
+            }
+            else
+            {
+                if (introPanel != null) introPanel.SetActive(false);
+                ShowStep(0);
+            }
         }
 
         private void Update()
         {
             HandleTypewriter();
             UpdateThrownObjects();
+            UpdateDialoguePanelPosition();
+
+            if (_inIntro)
+            {
+                UpdateIntro();
+                return;
+            }
 
             if (_currentStepIndex < 0 || _currentStepIndex >= steps.Count)
             {
@@ -158,46 +190,227 @@ namespace RhythmWitchClone.Gameplay
             {
                 if (continuePromptUI != null) continuePromptUI.SetActive(false);
                 if (guideArrow != null) guideArrow.gameObject.SetActive(false);
+                SkipTypingOnClick();
                 HandleWaitForMovement();
             }
             else if (currentStep.advanceMode == StepAdvanceMode.MoveToArea)
             {
                 if (continuePromptUI != null) continuePromptUI.SetActive(false);
+                SkipTypingOnClick();
                 HandleMoveToArea(currentStep);
             }
             else if (currentStep.advanceMode == StepAdvanceMode.WaitForEnemyDefeat)
             {
                 if (continuePromptUI != null) continuePromptUI.SetActive(false);
                 if (guideArrow != null) guideArrow.gameObject.SetActive(false);
+                SkipTypingOnClick();
                 HandleWaitForEnemyDefeat(currentStep);
             }
             else if (currentStep.advanceMode == StepAdvanceMode.WaitForFullHealth)
             {
                 if (continuePromptUI != null) continuePromptUI.SetActive(false);
                 if (guideArrow != null) guideArrow.gameObject.SetActive(false);
+                SkipTypingOnClick();
                 HandleWaitForFullHealth();
             }
             else if (currentStep.advanceMode == StepAdvanceMode.Finish)
             {
-                // Letzter Schritt: Text läuft normal zu Ende, aber E schaltet nichts mehr weiter -
-                // der Spieler verlässt das Tutorial über den Button im Win-Panel.
+                // Letzter Schritt: Klick überspringt nur den Schreib-Effekt, schaltet aber nicht weiter.
                 if (continuePromptUI != null) continuePromptUI.SetActive(false);
                 if (guideArrow != null) guideArrow.gameObject.SetActive(false);
-
-                if (_isTyping && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
-                {
-                    // E darf aber weiterhin den Schreib-Effekt überspringen.
-                    _visibleCharacterCount = _currentFullText.Length;
-                    if (dialogueText != null) dialogueText.text = _currentFullText;
-                    _isTyping = false;
-                }
+                SkipTypingOnClick();
             }
             else
             {
                 if (continuePromptUI != null) continuePromptUI.SetActive(!_isTyping);
                 if (guideArrow != null) guideArrow.gameObject.SetActive(false);
-                HandleInput();
+                HandleClickToContinue();
             }
+        }
+
+        // ------------------------------------------------------------------
+        // Intro
+        // ------------------------------------------------------------------
+
+        private void StartIntro()
+        {
+            _inIntro = true;
+            introPanel.SetActive(true);
+            ClearIntroImages();
+            if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
+            ShowIntroSlide(0);
+        }
+
+        private void UpdateIntro()
+        {
+            if (introContinuePrompt != null) introContinuePrompt.SetActive(!_isTyping);
+
+            // Bilder sanft einblenden
+            if (_introImageFadeTimer < introImageFadeDuration)
+            {
+                _introImageFadeTimer += Time.deltaTime;
+                SetIntroImagesAlpha(Mathf.Clamp01(_introImageFadeTimer / introImageFadeDuration));
+            }
+
+            if (!WasContinueClicked()) return;
+
+            if (_isTyping)
+            {
+                CompleteTyping();
+                return;
+            }
+
+            ShowIntroSlide(_currentIntroIndex + 1);
+        }
+
+        private void ShowIntroSlide(int index)
+        {
+            if (index >= introSlides.Count)
+            {
+                EndIntro();
+                return;
+            }
+
+            _currentIntroIndex = index;
+            IntroSlide slide = introSlides[index];
+
+            if (slide.images != null && slide.images.Exists(sprite => sprite != null))
+            {
+                BuildIntroImages(slide.images);
+            }
+
+            StartTyping(introText, slide.text);
+        }
+
+        /// <summary>
+        /// Erzeugt für jedes Bild des Abschnitts ein Image im Container - die Layout Group
+        /// ordnet sie automatisch nebeneinander an (gleiches Prinzip wie die Kapitel-Buttons
+        /// in den Einstellungen).
+        /// </summary>
+        private void BuildIntroImages(List<Sprite> sprites)
+        {
+            ClearIntroImages();
+            if (introImageContainer == null) return;
+
+            foreach (Sprite sprite in sprites)
+            {
+                if (sprite == null) continue;
+
+                GameObject imageObject = new GameObject("IntroImage", typeof(RectTransform), typeof(Image));
+                imageObject.transform.SetParent(introImageContainer, false);
+                Image image = imageObject.GetComponent<Image>();
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+
+                image.sprite = sprite;
+                _currentIntroImages.Add(image);
+            }
+
+            _introImageFadeTimer = 0f;
+            SetIntroImagesAlpha(introImageFadeDuration > 0f ? 0f : 1f);
+
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(introImageContainer);
+        }
+
+        private void ClearIntroImages()
+        {
+            _currentIntroImages.Clear();
+            if (introImageContainer == null) return;
+
+            foreach (Transform child in introImageContainer)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        private void SetIntroImagesAlpha(float alpha)
+        {
+            foreach (Image image in _currentIntroImages)
+            {
+                if (image == null) continue;
+                Color color = image.color;
+                color.a = alpha;
+                image.color = color;
+            }
+        }
+
+        /// <summary>
+        /// Beendet das Intro (nach dem letzten Abschnitt) und startet das Tutorial.
+        /// </summary>
+        private void EndIntro()
+        {
+            if (!_inIntro) return;
+
+            _inIntro = false;
+            if (introPanel != null) introPanel.SetActive(false);
+            if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
+
+            // Cooldown neu setzen, damit der Klick, der das Intro beendet hat, nicht gleich den ersten Tutorial-Text überspringt.
+            _nextClickAllowedTime = Time.unscaledTime + clickCooldown;
+            ShowStep(0);
+        }
+
+        // ------------------------------------------------------------------
+        // Klick / Schreibmaschine
+        // ------------------------------------------------------------------
+
+        /// <summary>
+        /// True, wenn in diesem Frame ein gültiger "Weiter"-Linksklick passiert ist:
+        /// nicht pausiert, nicht auf einem Button, und der Cooldown ist abgelaufen.
+        /// </summary>
+        private bool WasContinueClicked()
+        {
+            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return false;
+            if (Time.timeScale <= 0f) return false;
+            if (Time.unscaledTime < _nextClickAllowedTime) return false;
+            if (IsPointerOverButton()) return false;
+
+            _nextClickAllowedTime = Time.unscaledTime + clickCooldown;
+            return true;
+        }
+
+        /// <summary>
+        /// Prüft, ob die Maus gerade über einem anklickbaren UI-Element (Button, Slider, ...) liegt.
+        /// Normale Panels/Texte zählen nicht - darauf darf man zum Weiterschalten klicken.
+        /// </summary>
+        private bool IsPointerOverButton()
+        {
+            if (EventSystem.current == null || Mouse.current == null) return false;
+
+            PointerEventData pointerData = new PointerEventData(EventSystem.current)
+            {
+                position = Mouse.current.position.ReadValue()
+            };
+
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            foreach (RaycastResult result in results)
+            {
+                Selectable selectable = result.gameObject.GetComponentInParent<Selectable>();
+                if (selectable != null && selectable.interactable) return true;
+            }
+
+            return false;
+        }
+
+        private void StartTyping(TMP_Text target, string text)
+        {
+            _activeText = target;
+            _currentFullText = text ?? "";
+            _visibleCharacterCount = 0;
+            _typeTimer = 0f;
+            _isTyping = true;
+
+            if (_activeText != null) _activeText.text = "";
+        }
+
+        private void CompleteTyping()
+        {
+            _visibleCharacterCount = _currentFullText.Length;
+            if (_activeText != null) _activeText.text = _currentFullText;
+            _isTyping = false;
         }
 
         private void HandleTypewriter()
@@ -207,14 +420,20 @@ namespace RhythmWitchClone.Gameplay
             _typeTimer += Time.deltaTime;
             float secondsPerChar = charactersPerSecond > 0f ? 1f / charactersPerSecond : 0f;
 
-            while (secondsPerChar > 0f && _typeTimer >= secondsPerChar && _visibleCharacterCount < _currentFullText.Length)
+            if (secondsPerChar <= 0f)
+            {
+                CompleteTyping();
+                return;
+            }
+
+            while (_typeTimer >= secondsPerChar && _visibleCharacterCount < _currentFullText.Length)
             {
                 _typeTimer -= secondsPerChar;
                 _visibleCharacterCount++;
 
-                if (dialogueText != null)
+                if (_activeText != null)
                 {
-                    dialogueText.text = _currentFullText.Substring(0, _visibleCharacterCount);
+                    _activeText.text = _currentFullText.Substring(0, _visibleCharacterCount);
                 }
             }
 
@@ -224,28 +443,36 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
-        private void HandleInput()
+        /// <summary>
+        /// Für alle Schritte, die nicht per Klick weiterschalten: ein Klick darf trotzdem jederzeit
+        /// den Schreib-Effekt überspringen.
+        /// </summary>
+        private void SkipTypingOnClick()
         {
-            if (Keyboard.current == null || !Keyboard.current.eKey.wasPressedThisFrame) return;
+            if (_isTyping && WasContinueClicked())
+            {
+                CompleteTyping();
+            }
+        }
+
+        private void HandleClickToContinue()
+        {
+            if (!WasContinueClicked()) return;
 
             if (_isTyping)
             {
-                // Erster Druck während des Schreibens: sofort den kompletten Text anzeigen,
-                // statt direkt weiterzuspringen (aus den meisten Spielen bekanntes Verhalten).
-                _visibleCharacterCount = _currentFullText.Length;
-                if (dialogueText != null) dialogueText.text = _currentFullText;
-                _isTyping = false;
+                // Erster Klick während des Schreibens: sofort den kompletten Text anzeigen.
+                CompleteTyping();
                 return;
             }
 
             ShowStep(_currentStepIndex + 1);
         }
 
-        /// <summary>
-        /// Für Schritte mit StepAdvanceMode.WaitForMovement: springt automatisch weiter, sobald
-        /// der Spieler tatsächlich eine Bewegungstaste drückt - kein "E" nötig. Zählt erst, wenn
-        /// der Text fertig geschrieben ist.
-        /// </summary>
+        // ------------------------------------------------------------------
+        // Tutorial-Schritte
+        // ------------------------------------------------------------------
+
         private void HandleWaitForMovement()
         {
             if (_isTyping || Keyboard.current == null) return;
@@ -262,12 +489,6 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
-        /// <summary>
-        /// Für Schritte mit StepAdvanceMode.MoveToArea: zeigt den Führungs-Pfeil zur Ziel-Zone
-        /// und prüft jeden Frame den Abstand - kein echter Trigger-Collider nötig, reiner
-        /// Abstandsvergleich zur Position von "Target Area". Springt automatisch weiter, sobald
-        /// der Spieler nah genug dran ist.
-        /// </summary>
         private void HandleMoveToArea(TutorialStep step)
         {
             if (_isTyping || player == null || step.targetArea == null)
@@ -286,14 +507,6 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
-        /// <summary>
-        /// Für Schritte mit StepAdvanceMode.WaitForEnemyDefeat: wartet, bis der übergebene Gegner
-        /// zerstört wird (Unitys "== null"-Vergleich erkennt das automatisch, sobald Destroy()
-        /// gelaufen ist, auch wenn die Referenz technisch noch gesetzt ist). Kein Event-System
-        /// nötig, reines Prüfen jeden Frame. Merkt sich dabei laufend die letzte bekannte Position
-        /// des Gegners, damit beim Tod (wo sein Transform nicht mehr existiert) trotzdem bekannt
-        /// ist, von wo aus der Wurf-Effekt starten soll.
-        /// </summary>
         private void HandleWaitForEnemyDefeat(TutorialStep step)
         {
             if (_isTyping) return;
@@ -317,11 +530,6 @@ namespace RhythmWitchClone.Gameplay
             ShowStep(_currentStepIndex + 1);
         }
 
-        /// <summary>
-        /// Für Schritte mit StepAdvanceMode.WaitForFullHealth: wartet, bis der Spieler wieder
-        /// auf voller Gesundheit ist (z.B. damit er die Heilung der Verteidigungskarte einmal
-        /// selbst ausprobiert). Springt automatisch weiter, sobald CurrentHealth == MaxHealth.
-        /// </summary>
         private void HandleWaitForFullHealth()
         {
             if (_isTyping || player == null) return;
@@ -332,10 +540,6 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
-        /// <summary>
-        /// Erzeugt ein Bild, das sichtbar vom Todesort des Gegners zum Spieler fliegt und dort
-        /// nach der übergebenen Flugzeit Schaden verursacht.
-        /// </summary>
         private void SpawnThrownObject(Vector3 fromPosition, Sprite sprite, int damage, float duration)
         {
             if (player == null) return;
@@ -346,7 +550,6 @@ namespace RhythmWitchClone.Gameplay
 
             if (Camera.main != null)
             {
-                // Kamera dreht sich in diesem Projekt nie - einmaliges Ausrichten reicht.
                 thrownObject.transform.rotation = Camera.main.transform.rotation;
             }
 
@@ -363,10 +566,6 @@ namespace RhythmWitchClone.Gameplay
             });
         }
 
-        /// <summary>
-        /// Bewegt alle aktuell fliegenden geworfenen Gegenstände vom Startpunkt zum Spieler und
-        /// löst beim Ankommen den Schaden aus.
-        /// </summary>
         private void UpdateThrownObjects()
         {
             for (int i = _activeThrownObjects.Count - 1; i >= 0; i--)
@@ -391,12 +590,6 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
-        /// <summary>
-        /// Positioniert den Pfeil auf einem Kreis um den Spieler herum, versetzt in Richtung der
-        /// Ziel-Zone (wie ein Uhrzeiger) - liegt die Zone links, erscheint der Pfeil links vom
-        /// Spieler und zeigt auch nach links. Bleibt dabei zur Kamera ausgerichtet (gleiche
-        /// Technik wie beim Projektil: Blickrichtung zur Kamera + Ausrichtung in der Bildebene).
-        /// </summary>
         private void UpdateGuideArrow(Vector3 targetPosition)
         {
             if (guideArrow == null || player == null) return;
@@ -418,13 +611,29 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
+        /// <summary>
+        /// Lässt das Dialog-Panel sanft zum Platzhalter des aktuellen Schritts wandern.
+        /// </summary>
+        private void UpdateDialoguePanelPosition()
+        {
+            if (dialoguePanel == null || _dialoguePanelTarget == null) return;
+
+            Transform panelTransform = dialoguePanel.transform;
+            if (dialoguePanelMoveSpeed <= 0f)
+            {
+                panelTransform.position = _dialoguePanelTarget.position;
+                return;
+            }
+
+            panelTransform.position = Vector3.Lerp(panelTransform.position, _dialoguePanelTarget.position, dialoguePanelMoveSpeed * Time.deltaTime);
+        }
+
         private void ShowStep(int index)
         {
             HideAllMarkers();
 
             if (index < 0 || index >= steps.Count)
             {
-                // Tutorial fertig - Dialog schließen, Spiel läuft normal weiter.
                 if (dialoguePanel != null) dialoguePanel.SetActive(false);
                 _currentStepIndex = steps.Count;
                 return;
@@ -434,7 +643,19 @@ namespace RhythmWitchClone.Gameplay
 
             _currentStepIndex = index;
 
-            if (dialoguePanel != null) dialoguePanel.SetActive(true);
+            if (dialoguePanel != null)
+            {
+                bool wasHidden = !dialoguePanel.activeSelf;
+                dialoguePanel.SetActive(true);
+
+                if (step.dialoguePanelPosition != null)
+                {
+                    _dialoguePanelTarget = step.dialoguePanelPosition;
+
+                    // War das Panel vorher unsichtbar (z.B. direkt nach dem Intro), sofort hinspringen statt hinzuwandern.
+                    if (wasHidden) dialoguePanel.transform.position = _dialoguePanelTarget.position;
+                }
+            }
             if (step.marker != null) step.marker.SetActive(true);
 
             foreach (GameObject uiElement in step.uiElementsToReveal)
@@ -452,20 +673,12 @@ namespace RhythmWitchClone.Gameplay
                 player.TakeDamage(step.damageToApplyOnShow);
             }
 
-            // Bei einem "Finish"-Schritt zusätzlich das Win-Panel öffnen - der Dialogtext läuft
-            // dabei ganz normal weiter, beides ist gleichzeitig sichtbar. Über den "Zurück zum
-            // Menü"-Button des Win-Panels kommt der Spieler dann in die Safe Zone.
             if (step.advanceMode == StepAdvanceMode.Finish && player != null)
             {
                 player.WinLevel();
             }
 
-            _currentFullText = step.text ?? "";
-            _visibleCharacterCount = 0;
-            _typeTimer = 0f;
-            _isTyping = true;
-
-            if (dialogueText != null) dialogueText.text = "";
+            StartTyping(dialogueText, step.text);
         }
 
         private void HideAllMarkers()

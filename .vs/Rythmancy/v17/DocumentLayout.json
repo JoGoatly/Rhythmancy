@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|c:\\users\\thinkpad\\documents\\github\\rythmancy\\assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|c:\\users\\thinkpad\\documents\\github\\rythmancy\\assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\ui\\settings\\settingsstyle.uss||{3B902123-F8A7-4915-9F01-361F908088D0}",
@@ -62,11 +62,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "PlayerController.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Gameplay\\PlayerController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\PlayerController.cs",
@@ -79,13 +79,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "Tutorialmanager.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Tutorialmanager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Tutorialmanager.cs",
               "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Tutorialmanager.cs",
               "RelativeToolTip": "Assets\\Scripts\\Tutorialmanager.cs",
-              "ViewState": "AgIAAL8BAAAAAAAAAAAuwN4BAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAJUCAAAAAAAAAAAUwLMCAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-09-16T09:38:28.049Z",
               "EditorCaption": ""
