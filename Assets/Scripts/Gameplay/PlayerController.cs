@@ -161,6 +161,7 @@ namespace RhythmWitchClone.Gameplay
         [SerializeField] private float winCheckDelay = 1f;
 
         private bool _hasWonLevel;
+        private bool _autoWinCheckEnabled = true;
         private float _winCheckTimer;
 
         public int CurrentHealth { get; private set; }
@@ -178,6 +179,32 @@ namespace RhythmWitchClone.Gameplay
         public void SetMovementLocked(bool locked)
         {
             _movementLocked = locked;
+        }
+
+        /// <summary>
+        /// Schiebt den Prozent-Text horizontal genau an das aktuelle Ende des Balkens.
+        /// Der Text muss ein Kind von "Fill Area" des Sliders sein - sein Anker wird hier
+        /// auf den aktuellen Füllstand (0 = links, 1 = rechts) gesetzt. Funktioniert auch,
+        /// wenn der Balken per "Image Type: Filled" gefüllt wird statt über die Breite.
+        /// </summary>
+        private static void FollowBarEnd(TMP_Text text, Slider slider)
+        {
+            if (text == null || slider == null) return;
+
+            RectTransform rect = text.rectTransform;
+            float x = slider.normalizedValue;
+            rect.anchorMin = new Vector2(x, rect.anchorMin.y);
+            rect.anchorMax = new Vector2(x, rect.anchorMax.y);
+            rect.anchoredPosition = new Vector2(0f, rect.anchoredPosition.y);
+        }
+
+        /// <summary>
+        /// Schaltet die automatische Sieg-Prüfung ("keine Gegner mehr = gewonnen") an/aus.
+        /// Das Tutorial schaltet sie aus und ruft WinLevel() selbst nach dem letzten Schritt auf.
+        /// </summary>
+        public void SetAutoWinCheckEnabled(bool enabled)
+        {
+            _autoWinCheckEnabled = enabled;
         }
 
         private void Awake()
@@ -774,8 +801,11 @@ namespace RhythmWitchClone.Gameplay
 
             if (healthText != null)
             {
-                healthText.text = $"{CurrentHealth} / {maxHealth}";
+                int healthPercent = maxHealth > 0 ? Mathf.RoundToInt(100f * CurrentHealth / maxHealth) : 0;
+                healthText.text = $"{healthPercent}%";
             }
+
+            FollowBarEnd(healthText, healthSlider);
         }
 
         // Für die Hover-Erkennung - wiederverwendete Liste, damit nicht jeden Frame neuer
@@ -889,7 +919,7 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         private void CheckForLevelWin()
         {
-            if (_hasWonLevel) return;
+            if (_hasWonLevel || !_autoWinCheckEnabled) return;
             if (SceneManager.GetActiveScene().name == safeZoneSceneName) return; // Safe Zone ist kein Level
 
             if (_winCheckTimer > 0f)
@@ -907,7 +937,7 @@ namespace RhythmWitchClone.Gameplay
 
         /// <summary>
         /// Löst den Level-Sieg aus (Win-Panel öffnen, Level als geschafft markieren, Sound
-        /// abspielen). Public, damit auch TutorialManager das bei einem "Finish"-Schritt direkt
+        /// abspielen). Public, damit auch TutorialManager das nach dem letzten Tutorial-Schritt direkt
         /// aufrufen kann, nicht nur die automatische Gegner-Zähl-Prüfung.
         /// </summary>
         public void WinLevel()

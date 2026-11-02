@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using UnityEngine.InputSystem;
 
 namespace RhythmWitchClone.UI.MainMenu
 {
@@ -71,9 +72,12 @@ namespace RhythmWitchClone.UI.MainMenu
         {
             if (videoParallaxTarget == null) return;
 
+            if (Mouse.current == null) return;
+
+            Vector2 mousePosition = Mouse.current.position.ReadValue();
             Vector2 viewportPos = new Vector2(
-                Input.mousePosition.x / Screen.width,
-                Input.mousePosition.y / Screen.height);
+                mousePosition.x / Screen.width,
+                mousePosition.y / Screen.height);
 
             Vector2 centeredOffset = viewportPos - new Vector2(0.5f, 0.5f); // -0.5 .. 0.5
             Vector2 targetOffset = _videoParallaxBasePosition + centeredOffset * 2f * parallaxStrength;

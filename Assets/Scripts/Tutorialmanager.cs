@@ -27,7 +27,9 @@ namespace RhythmWitchClone.Gameplay
     /// - "Move To Area": Pfeil um den Spieler zeigt zur Ziel-Zone, weiter sobald erreicht.
     /// - "Wait For Enemy Defeat": wartet, bis der eingetragene Gegner besiegt ist.
     /// - "Wait For Full Health": wartet, bis der Spieler wieder volle HP hat.
-    /// - "Finish": Text + Level-Win-Panel gleichzeitig; Klick überspringt nur noch den Schreib-Effekt.
+    ///
+    /// Sobald der letzte Schritt abgeschlossen ist, öffnet sich das Win-Panel des Spielers.
+    /// Die automatische "Keine Gegner mehr = Sieg"-Prüfung ist im Tutorial ausgeschaltet.
     ///
     /// Klicks auf Buttons (z.B. Pause-Menü, Win-Panel) zählen NICHT als "Weiter"-Klick, und bei
     /// pausiertem Spiel wird nichts weitergeschaltet.
@@ -40,8 +42,7 @@ namespace RhythmWitchClone.Gameplay
             WaitForMovement,
             MoveToArea,
             WaitForEnemyDefeat,
-            WaitForFullHealth,
-            Finish
+            WaitForFullHealth
         }
 
         [System.Serializable]
@@ -153,7 +154,12 @@ namespace RhythmWitchClone.Gameplay
             HideAllMarkers();
 
             // Bewegung ist zu Beginn gesperrt - wird erst durch einen Schritt mit "Unlocks Movement" freigeschaltet.
-            if (player != null) player.SetMovementLocked(true);
+            if (player != null)
+            {
+                player.SetMovementLocked(true);
+                // Im Tutorial gibt es den Sieg erst nach dem letzten Schritt, nicht schon wenn der Dummy tot ist.
+                player.SetAutoWinCheckEnabled(false);
+            }
 
             if (introSlides.Count > 0 && introPanel != null)
             {
@@ -168,6 +174,12 @@ namespace RhythmWitchClone.Gameplay
 
         private void Update()
         {
+            // Versteckter Shortcut: M überspringt das komplette Tutorial (vor allem zum schnellen Testen).
+            if (Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame)
+            {
+                SkipWholeTutorial();
+            }
+
             HandleTypewriter();
             UpdateThrownObjects();
             UpdateDialoguePanelPosition();
@@ -212,13 +224,6 @@ namespace RhythmWitchClone.Gameplay
                 if (guideArrow != null) guideArrow.gameObject.SetActive(false);
                 SkipTypingOnClick();
                 HandleWaitForFullHealth();
-            }
-            else if (currentStep.advanceMode == StepAdvanceMode.Finish)
-            {
-                // Letzter Schritt: Klick überspringt nur den Schreib-Effekt, schaltet aber nicht weiter.
-                if (continuePromptUI != null) continuePromptUI.SetActive(false);
-                if (guideArrow != null) guideArrow.gameObject.SetActive(false);
-                SkipTypingOnClick();
             }
             else
             {
@@ -634,8 +639,12 @@ namespace RhythmWitchClone.Gameplay
 
             if (index < 0 || index >= steps.Count)
             {
+                // Alle Schritte geschafft -> Dialog schließen und Win-Panel öffnen.
+                bool wasRunning = _currentStepIndex < steps.Count;
                 if (dialoguePanel != null) dialoguePanel.SetActive(false);
+                if (guideArrow != null) guideArrow.gameObject.SetActive(false);
                 _currentStepIndex = steps.Count;
+                if (wasRunning && player != null) player.WinLevel();
                 return;
             }
 
@@ -673,12 +682,32 @@ namespace RhythmWitchClone.Gameplay
                 player.TakeDamage(step.damageToApplyOnShow);
             }
 
-            if (step.advanceMode == StepAdvanceMode.Finish && player != null)
+            StartTyping(dialogueText, step.text);
+        }
+
+        /// <summary>
+        /// Beendet Intro und Tutorial sofort und öffnet das Win-Panel (versteckt auf Taste M).
+        /// </summary>
+        private void SkipWholeTutorial()
+        {
+            if (!_inIntro && _currentStepIndex >= steps.Count) return; // schon fertig
+
+            _inIntro = false;
+            _isTyping = false;
+            if (introPanel != null) introPanel.SetActive(false);
+            if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
+            if (dialoguePanel != null) dialoguePanel.SetActive(false);
+            if (continuePromptUI != null) continuePromptUI.SetActive(false);
+            if (guideArrow != null) guideArrow.gameObject.SetActive(false);
+            HideAllMarkers();
+
+            _currentStepIndex = steps.Count;
+
+            if (player != null)
             {
+                player.SetMovementLocked(false);
                 player.WinLevel();
             }
-
-            StartTyping(dialogueText, step.text);
         }
 
         private void HideAllMarkers()

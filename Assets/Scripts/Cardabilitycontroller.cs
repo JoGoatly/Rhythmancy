@@ -1,12 +1,15 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using TMPro;
 
 namespace RhythmWitchClone.Gameplay
 {
     /// <summary>
-    /// Karten-System: 3 Karten (Verteidigung, Angriff, Spezial), per Taste 1/2/3 an-/abgewählt.
+    /// Karten-System: 3 Karten (Verteidigung, Angriff, Spezial), per Taste 1/2/3 oder per
+    /// Linksklick auf die Karte an-/abgewählt.
     /// Es kann immer nur eine Karte gleichzeitig aktiv sein - wählt man eine neue, wird die
     /// vorherige automatisch abgelegt. Nochmal dieselbe Zahl drücken legt die aktuell aktive
     /// Karte wieder ab.
@@ -41,6 +44,8 @@ namespace RhythmWitchClone.Gameplay
         [Tooltip("Wie viel Mana pro Sekunde zurückkommt, solange keine Karte aktiv ist.")]
         [SerializeField] private float manaRegenPerSecond = 5f;
         [SerializeField] private Slider manaBarSlider;
+        [Tooltip("Optional: Prozent-Anzeige (z.B. '80%'). Als Kind von 'Fill Area' des Sliders anlegen - wandert automatisch mit dem Balkenende mit.")]
+        [SerializeField] private TMP_Text manaText;
 
         [Header("Karten (UI)")]
         [SerializeField] private RectTransform defCardTransform;
@@ -145,11 +150,51 @@ namespace RhythmWitchClone.Gameplay
 
         private void HandleCardInput()
         {
-            if (Keyboard.current == null) return;
+            if (Time.timeScale <= 0f) return; // pausiert / Game Over - keine Karten
 
-            if (Keyboard.current.digit1Key.wasPressedThisFrame) ToggleCard(0);
-            if (Keyboard.current.digit2Key.wasPressedThisFrame) ToggleCard(1);
-            if (Keyboard.current.digit3Key.wasPressedThisFrame) TriggerSpecialCard();
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.digit1Key.wasPressedThisFrame) ToggleCard(0);
+                if (Keyboard.current.digit2Key.wasPressedThisFrame) ToggleCard(1);
+                if (Keyboard.current.digit3Key.wasPressedThisFrame) TriggerSpecialCard();
+            }
+
+            if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+            {
+                int clickedCard = GetCardUnderMouse();
+                if (clickedCard == 0) ToggleCard(0);
+                else if (clickedCard == 1) ToggleCard(1);
+                else if (clickedCard == 2) TriggerSpecialCard();
+            }
+        }
+
+        /// <summary>
+        /// Prüft per UI-Raycast, welche Karte unter der Maus liegt (-1 = keine). Die Ergebnisse
+        /// kommen von oben nach unten sortiert - bei überlappenden Karten (Fächer) gewinnt also
+        /// die, die sichtbar oben liegt. Klicks auf den Kartentext zählen mit, da er ein Kind
+        /// der Karte ist.
+        /// </summary>
+        private int GetCardUnderMouse()
+        {
+            if (EventSystem.current == null) return -1;
+
+            PointerEventData pointerData = new PointerEventData(EventSystem.current)
+            {
+                position = Mouse.current.position.ReadValue()
+            };
+
+            List<RaycastResult> results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(pointerData, results);
+
+            foreach (RaycastResult result in results)
+            {
+                Transform hit = result.gameObject.transform;
+                if (defCardTransform != null && hit.IsChildOf(defCardTransform)) return 0;
+                if (atkCardTransform != null && hit.IsChildOf(atkCardTransform)) return 1;
+                if (spcCardTransform != null && hit.IsChildOf(spcCardTransform)) return 2;
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -260,12 +305,38 @@ namespace RhythmWitchClone.Gameplay
             cardTransform.anchoredPosition = Vector2.Lerp(cardTransform.anchoredPosition, targetPosition, Time.deltaTime * cardLiftSpeed);
         }
 
+        /// <summary>
+        /// Schiebt den Prozent-Text horizontal genau an das aktuelle Ende des Balkens.
+        /// Der Text muss ein Kind von "Fill Area" des Sliders sein - sein Anker wird hier
+        /// auf den aktuellen Füllstand (0 = links, 1 = rechts) gesetzt. Funktioniert auch,
+        /// wenn der Balken per "Image Type: Filled" gefüllt wird statt über die Breite.
+        /// </summary>
+        private static void FollowBarEnd(TMP_Text text, Slider slider)
+        {
+            if (text == null || slider == null) return;
+
+            RectTransform rect = text.rectTransform;
+            float x = slider.normalizedValue;
+            rect.anchorMin = new Vector2(x, rect.anchorMin.y);
+            rect.anchorMax = new Vector2(x, rect.anchorMax.y);
+            rect.anchoredPosition = new Vector2(0f, rect.anchoredPosition.y);
+        }
+
         private void UpdateManaBarUI()
         {
-            if (manaBarSlider == null) return;
+            if (manaBarSlider != null)
+            {
+                manaBarSlider.maxValue = maxMana;
+                manaBarSlider.value = _currentMana;
+            }
 
-            manaBarSlider.maxValue = maxMana;
-            manaBarSlider.value = _currentMana;
+            if (manaText != null)
+            {
+                int manaPercent = maxMana > 0f ? Mathf.RoundToInt(100f * _currentMana / maxMana) : 0;
+                manaText.text = $"{manaPercent}%";
+            }
+
+            FollowBarEnd(manaText, manaBarSlider);
         }
     }
 }
