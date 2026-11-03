@@ -871,7 +871,8 @@ namespace RhythmWitchClone.Gameplay
             }
             _velocity.y += gravity * Time.deltaTime;
 
-            Vector3 motion = moveDirection * moveSpeed + Vector3.up * _velocity.y;
+            float groundSpeedMultiplier = LevelManager.Instance != null ? LevelManager.Instance.GetSpeedMultiplierAt(transform.position) : 1f; // z.B. Büsche bremsen
+            Vector3 motion = moveDirection * moveSpeed * groundSpeedMultiplier + Vector3.up * _velocity.y;
             _controller.Move(motion * Time.deltaTime);
         }
 

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.InputSystem;
+using RhythmWitchClone.Audio;
 
 namespace RhythmWitchClone.Gameplay
 {
@@ -16,7 +17,7 @@ namespace RhythmWitchClone.Gameplay
     ///
     /// Jeder Tutorial-Schritt kann das Dialog-Panel zu einem Platzhalter im Canvas wandern lassen
     /// ("Dialogue Panel Position"), damit es dort steht, wo der Schritt gerade etwas erklärt.
-    /// - Linksklick: erster Klick während des Schreibens zeigt sofort den ganzen Text, nächster
+    /// - Linksklick oder E: erster Druck während des Schreibens zeigt sofort den ganzen Text, nächster
     ///   Klick geht zum nächsten Abschnitt. Kleiner Klick-Cooldown gegen versehentliche Doppelklicks.
     /// - Nach dem letzten Abschnitt verschwindet das Intro-Panel und das Tutorial startet.
     ///
@@ -52,6 +53,8 @@ namespace RhythmWitchClone.Gameplay
             public string text;
             [Tooltip("Bilder, die oben nebeneinander angezeigt werden, sobald dieser Abschnitt beginnt (werden automatisch im Container angeordnet). Leere Liste = die Bilder vom vorherigen Abschnitt bleiben stehen.")]
             public List<Sprite> images = new List<Sprite>();
+            [Tooltip("Optional: Sprachaufnahme (Voice Acting) für diesen Abschnitt. Startet mit dem Abschnitt; beim Weiterschalten wird sie sofort gestoppt.")]
+            public AudioClip voiceClip;
         }
 
         [System.Serializable]
@@ -104,6 +107,8 @@ namespace RhythmWitchClone.Gameplay
         [SerializeField] private GameObject introContinuePrompt;
         [Tooltip("Wie lange neue Intro-Bilder zum Einblenden brauchen (Sekunden).")]
         [SerializeField] private float introImageFadeDuration = 0.5f;
+        [Tooltip("Lautstärke der Sprachaufnahmen (wird zusätzlich mit der SFX-Lautstärke aus den Einstellungen multipliziert).")]
+        [Range(0f, 1f)][SerializeField] private float introVoiceVolume = 1f;
 
         [Header("Schritte")]
         [SerializeField] private List<TutorialStep> steps = new List<TutorialStep>();
@@ -147,8 +152,17 @@ namespace RhythmWitchClone.Gameplay
 
         private readonly List<ThrownObject> _activeThrownObjects = new List<ThrownObject>();
 
+        private AudioSource _voiceSource;
+        private bool _voicePausedByGamePause;
+
         private void Start()
         {
+            // Eine einzige AudioSource für alle Sprachaufnahmen - dadurch kann nie mehr als eine gleichzeitig laufen.
+            _voiceSource = gameObject.AddComponent<AudioSource>();
+            _voiceSource.playOnAwake = false;
+            _voiceSource.loop = false;
+            _voiceSource.spatialBlend = 0f;
+
             if (dialoguePanel != null) dialoguePanel.SetActive(false);
             if (continuePromptUI != null) continuePromptUI.SetActive(false);
             HideAllMarkers();
@@ -248,6 +262,8 @@ namespace RhythmWitchClone.Gameplay
 
         private void UpdateIntro()
         {
+            UpdateVoicePause();
+
             if (introContinuePrompt != null) introContinuePrompt.SetActive(!_isTyping);
 
             // Bilder sanft einblenden
@@ -284,7 +300,49 @@ namespace RhythmWitchClone.Gameplay
                 BuildIntroImages(slide.images);
             }
 
+            PlayVoice(slide.voiceClip);
             StartTyping(introText, slide.text);
+        }
+
+        /// <summary>
+        /// Stoppt die aktuelle Sprachaufnahme sofort und startet die neue (falls vorhanden) -
+        /// keine Überlappung, da immer dieselbe AudioSource benutzt wird.
+        /// </summary>
+        private void PlayVoice(AudioClip clip)
+        {
+            if (_voiceSource == null) return;
+
+            _voiceSource.Stop();
+            _voicePausedByGamePause = false;
+            if (clip == null) return;
+
+            float sfxVolume = AudioManager.Instance != null ? AudioManager.Instance.GetSfxVolume() : 1f;
+            _voiceSource.volume = introVoiceVolume * sfxVolume;
+            _voiceSource.clip = clip;
+            _voiceSource.Play();
+        }
+
+        private void StopVoice()
+        {
+            if (_voiceSource != null) _voiceSource.Stop();
+            _voicePausedByGamePause = false;
+        }
+
+        /// <summary>Hält die Sprachaufnahme an, solange das Pause-Menü offen ist.</summary>
+        private void UpdateVoicePause()
+        {
+            if (_voiceSource == null) return;
+
+            if (Time.timeScale <= 0f && _voiceSource.isPlaying)
+            {
+                _voiceSource.Pause();
+                _voicePausedByGamePause = true;
+            }
+            else if (Time.timeScale > 0f && _voicePausedByGamePause)
+            {
+                _voiceSource.UnPause();
+                _voicePausedByGamePause = false;
+            }
         }
 
         /// <summary>
@@ -348,6 +406,7 @@ namespace RhythmWitchClone.Gameplay
             if (!_inIntro) return;
 
             _inIntro = false;
+            StopVoice();
             if (introPanel != null) introPanel.SetActive(false);
             if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
 
@@ -361,15 +420,17 @@ namespace RhythmWitchClone.Gameplay
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// True, wenn in diesem Frame ein gültiger "Weiter"-Linksklick passiert ist:
-        /// nicht pausiert, nicht auf einem Button, und der Cooldown ist abgelaufen.
+        /// True, wenn in diesem Frame gültig "Weiter" gedrückt wurde - per Linksklick (nicht auf
+        /// einem Button) ODER per Taste E. Nicht bei pausiertem Spiel, und erst nach Ablauf des Cooldowns.
         /// </summary>
         private bool WasContinueClicked()
         {
-            if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return false;
+            bool ePressed = Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
+            bool leftClicked = Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame && !IsPointerOverButton();
+
+            if (!ePressed && !leftClicked) return false;
             if (Time.timeScale <= 0f) return false;
             if (Time.unscaledTime < _nextClickAllowedTime) return false;
-            if (IsPointerOverButton()) return false;
 
             _nextClickAllowedTime = Time.unscaledTime + clickCooldown;
             return true;
@@ -694,6 +755,7 @@ namespace RhythmWitchClone.Gameplay
 
             _inIntro = false;
             _isTyping = false;
+            StopVoice();
             if (introPanel != null) introPanel.SetActive(false);
             if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
             if (dialoguePanel != null) dialoguePanel.SetActive(false);

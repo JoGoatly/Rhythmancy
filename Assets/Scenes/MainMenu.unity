@@ -1843,7 +1843,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &608769174
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2298,10 +2298,12 @@ MonoBehaviour:
       - enemyPrefab: {fileID: 2781122862677714322, guid: f81c5e4818bab8a49a2d8203b390b60b, type: 3}
         count: 3
     mapSettings:
+      autoDetectGround: 1
       mapCenter: {x: 0, y: 0, z: 0}
       mapSize: {x: 40, y: 40}
       clearRadiusAroundPlayer: 4
       enemyMinDistanceFromPlayer: 8
+      objectClearance: 1.5
       addOuterWall: 1
       bottomBoundaryOffset: 3
       treeSprites:
@@ -2316,13 +2318,19 @@ MonoBehaviour:
       treeTrunkRadius: 0.4
       treeColliderHeight: 3
       rockSprites:
-      - {fileID: 21300000, guid: cf70d5eee59bdc14c94732abb67029f0, type: 3}
+      - {fileID: 21300000, guid: d679857323f065a4e81b35fd5bb0c05b, type: 3}
+      - {fileID: 21300000, guid: 0c2d5d76496dd36408964e32f9d5cd6f, type: 3}
+      - {fileID: 21300000, guid: bf740e2cd5c5ba84fa0d4f327a853bce, type: 3}
       rockCount: 15
       rockHeightRange: {x: 0.3, y: 1}
       bushSprites:
       - {fileID: 21300000, guid: 0eed40fe7f06a2f4e98149dd176d48f3, type: 3}
+      - {fileID: 21300000, guid: 532307e2e4cfd2741832df0ae96c06d7, type: 3}
+      - {fileID: 21300000, guid: ef4448a7a05983f4ca18093758288c0b, type: 3}
       bushCount: 25
       bushHeightRange: {x: 0.5, y: 1.6}
+      bushSpeedMultiplier: 0.5
+      bushSlowAreaSize: 0.8
       brightnessRange: {x: 0.75, y: 1}
   - chapterName: Kapitel 2
     sceneName: 
@@ -2338,10 +2346,12 @@ MonoBehaviour:
     - levelName: 
       enemies: []
     mapSettings:
+      autoDetectGround: 1
       mapCenter: {x: 0, y: 0, z: 0}
       mapSize: {x: 40, y: 40}
       clearRadiusAroundPlayer: 4
       enemyMinDistanceFromPlayer: 8
+      objectClearance: 1.5
       addOuterWall: 1
       bottomBoundaryOffset: 3
       treeSprites:
@@ -2363,6 +2373,81 @@ MonoBehaviour:
       - {fileID: 21300000, guid: 0eed40fe7f06a2f4e98149dd176d48f3, type: 3}
       bushCount: 25
       bushHeightRange: {x: 0.5, y: 1.6}
+      bushSpeedMultiplier: 0.5
+      bushSlowAreaSize: 0.8
+      brightnessRange: {x: 0.75, y: 1}
+  environmentScenes:
+  - sceneName: SafeZone
+    mapSettings:
+      autoDetectGround: 1
+      mapCenter: {x: 0, y: 0, z: 0}
+      mapSize: {x: 40, y: 40}
+      clearRadiusAroundPlayer: 4
+      enemyMinDistanceFromPlayer: 8
+      objectClearance: 1.5
+      addOuterWall: 1
+      bottomBoundaryOffset: 3
+      treeSprites:
+      - {fileID: 21300000, guid: 0b8a3df0d4837d146a4816cc5315aa3c, type: 3}
+      forestDepth: 6
+      treeSpacing: 1.5
+      treeRandomOffset: 0.8
+      forestEdgeWaviness: 0.6
+      forestEdgeNoiseScale: 0.12
+      forestEdgeDensity: 0.4
+      treeHeightRange: {x: 3, y: 6}
+      treeTrunkRadius: 0.4
+      treeColliderHeight: 3
+      rockSprites:
+      - {fileID: 21300000, guid: d679857323f065a4e81b35fd5bb0c05b, type: 3}
+      - {fileID: 21300000, guid: 0c2d5d76496dd36408964e32f9d5cd6f, type: 3}
+      - {fileID: 21300000, guid: bf740e2cd5c5ba84fa0d4f327a853bce, type: 3}
+      rockCount: 15
+      rockHeightRange: {x: 0.3, y: 1}
+      bushSprites:
+      - {fileID: 21300000, guid: 0eed40fe7f06a2f4e98149dd176d48f3, type: 3}
+      - {fileID: 21300000, guid: 532307e2e4cfd2741832df0ae96c06d7, type: 3}
+      - {fileID: 21300000, guid: ef4448a7a05983f4ca18093758288c0b, type: 3}
+      bushCount: 25
+      bushHeightRange: {x: 0.5, y: 1.6}
+      bushSpeedMultiplier: 0.5
+      bushSlowAreaSize: 0.8
+      brightnessRange: {x: 0.75, y: 1}
+  - sceneName: Tutorial
+    mapSettings:
+      autoDetectGround: 1
+      mapCenter: {x: 0, y: 0, z: 0}
+      mapSize: {x: 40, y: 40}
+      clearRadiusAroundPlayer: 4
+      enemyMinDistanceFromPlayer: 8
+      objectClearance: 1.5
+      addOuterWall: 1
+      bottomBoundaryOffset: 3
+      treeSprites:
+      - {fileID: 21300000, guid: 0b8a3df0d4837d146a4816cc5315aa3c, type: 3}
+      forestDepth: 6
+      treeSpacing: 1.5
+      treeRandomOffset: 0.8
+      forestEdgeWaviness: 0.6
+      forestEdgeNoiseScale: 0.12
+      forestEdgeDensity: 0.4
+      treeHeightRange: {x: 3, y: 6}
+      treeTrunkRadius: 0.4
+      treeColliderHeight: 3
+      rockSprites:
+      - {fileID: 21300000, guid: d679857323f065a4e81b35fd5bb0c05b, type: 3}
+      - {fileID: 21300000, guid: 0c2d5d76496dd36408964e32f9d5cd6f, type: 3}
+      - {fileID: 21300000, guid: bf740e2cd5c5ba84fa0d4f327a853bce, type: 3}
+      rockCount: 15
+      rockHeightRange: {x: 0.3, y: 1}
+      bushSprites:
+      - {fileID: 21300000, guid: 0eed40fe7f06a2f4e98149dd176d48f3, type: 3}
+      - {fileID: 21300000, guid: 532307e2e4cfd2741832df0ae96c06d7, type: 3}
+      - {fileID: 21300000, guid: ef4448a7a05983f4ca18093758288c0b, type: 3}
+      bushCount: 25
+      bushHeightRange: {x: 0.5, y: 1.6}
+      bushSpeedMultiplier: 0.5
+      bushSlowAreaSize: 0.8
       brightnessRange: {x: 0.75, y: 1}
   propMaterial: {fileID: 0}
 --- !u!4 &867025686
@@ -4256,59 +4341,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1765026433
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1765026435}
-  - component: {fileID: 1765026434}
-  m_Layer: 0
-  m_Name: BeatManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!320 &1765026434
-PlayableDirector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765026433}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: e04309b143b55cd4c8c979bc8a1bb859, type: 2}
-  m_InitialState: 1
-  m_WrapMode: 2
-  m_DirectorUpdateMode: 1
-  m_InitialTime: 0
-  m_SceneBindings:
-  - key: {fileID: -576700320278882515, guid: e04309b143b55cd4c8c979bc8a1bb859, type: 2}
-    value: {fileID: 0}
-  - key: {fileID: -4453267470516871117, guid: e04309b143b55cd4c8c979bc8a1bb859, type: 2}
-    value: {fileID: 0}
-  m_ExposedReferences:
-    m_References: []
---- !u!4 &1765026435
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1765026433}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 909.1232, y: 504.97095, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1813496109
 GameObject:
   m_ObjectHideFlags: 0
@@ -5170,4 +5202,3 @@ SceneRoots:
   - {fileID: 239412289}
   - {fileID: 1645987714}
   - {fileID: 1486308994}
-  - {fileID: 1765026435}

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -52,7 +53,10 @@ namespace RhythmWitchClone.Levels
         public class MapSettings
         {
             [Header("Spielfeld")]
-            [Tooltip("Mitte des Spielfelds in der Szene (Y = Höhe des Bodens).")]
+            [Tooltip("AN = Mitte und Größe des Spielfelds werden automatisch vom Boden unter dem Spieler übernommen " +
+                     "(Map Center / Map Size werden dann ignoriert). Der Boden braucht dafür einen Collider (hat eine Plane automatisch).")]
+            public bool autoDetectGround = true;
+            [Tooltip("Mitte des Spielfelds in der Szene (Y = Höhe des Bodens). Nur wenn Auto Detect Ground AUS ist.")]
             public Vector3 mapCenter = Vector3.zero;
             [Tooltip("Gesamtgröße des Spielfelds in X/Z (inklusive Wald am Rand).")]
             public Vector2 mapSize = new Vector2(40f, 40f);
@@ -60,6 +64,8 @@ namespace RhythmWitchClone.Levels
             public float clearRadiusAroundPlayer = 4f;
             [Tooltip("Gegner spawnen mindestens so weit vom Spieler entfernt.")]
             public float enemyMinDistanceFromPlayer = 8f;
+            [Tooltip("Steine, Büsche und Gegner halten mindestens so viel Abstand zu allem, was in der Szene schon einen Collider hat (Gebäude, Portal, Shop, Interaktions-Zonen, ...).")]
+            public float objectClearance = 1.5f;
             [Tooltip("Unsichtbare Wand ganz außen um das Spielfeld, falls doch eine Lücke im Wald ist.")]
             public bool addOuterWall = true;
             [Tooltip("Am unteren Rand (zur Kamera hin) verdecken die Bäume den Spieler, weil ihre Bilder nach oben ragen. " +
@@ -99,10 +105,41 @@ namespace RhythmWitchClone.Levels
             public int bushCount = 25;
             [Tooltip("Zufällige Höhe in Welt-Einheiten (min / max).")]
             public Vector2 bushHeightRange = new Vector2(0.5f, 1.6f);
+            [Tooltip("Tempo von Spieler und Gegnern, solange sie in einem Busch stehen (0.5 = halb so schnell).")]
+            [Range(0.1f, 1f)] public float bushSpeedMultiplier = 0.5f;
+            [Tooltip("Wie groß die bremsende Fläche im Verhältnis zur Buschbreite ist (1 = ganze Breite).")]
+            [Range(0.2f, 1.2f)] public float bushSlowAreaSize = 0.8f;
 
             [Header("Farbe")]
             [Tooltip("Zufällige Helligkeit (1 = Originalbild, kleiner = dunkler, größer als 1 = heller, z.B. 0.8 / 1.15).")]
             public Vector2 brightnessRange = new Vector2(0.75f, 1f);
+
+            /// <summary>
+            /// Unity setzt bei einem per "+" neu angelegten Listeneintrag alle Zahlen auf 0, statt
+            /// die Standardwerte oben zu benutzen (Abstand 0, Anzahl 0, Größe 0 -> es wird nichts
+            /// erzeugt). Erkennt das und trägt die Standardwerte nach - eingetragene Bilder bleiben.
+            /// </summary>
+            public void FillDefaultsIfUninitialized()
+            {
+                bool uninitialized = treeHeightRange == Vector2.zero && bushHeightRange == Vector2.zero &&
+                                     rockHeightRange == Vector2.zero && brightnessRange == Vector2.zero;
+                if (!uninitialized) return;
+
+                MapSettings defaults = new MapSettings();
+                foreach (System.Reflection.FieldInfo field in typeof(MapSettings).GetFields())
+                {
+                    if (field.FieldType == typeof(List<Sprite>)) continue; // Bilder behalten
+                    field.SetValue(this, field.GetValue(defaults));
+                }
+            }
+        }
+
+        [Serializable]
+        public class EnvironmentScene
+        {
+            [Tooltip("Exakter Szenen-Dateiname (ohne .unity), z.B. SafeZone.")]
+            public string sceneName;
+            public MapSettings mapSettings = new MapSettings();
         }
 
         [Serializable]
@@ -118,12 +155,24 @@ namespace RhythmWitchClone.Levels
         [Header("Kapitel (Reihenfolge = Spielreihenfolge)")]
         [SerializeField] private List<Chapter> chapters = new List<Chapter>();
 
+        [Header("Weitere Szenen mit Wald/Steinen/Büschen, aber ohne Gegner (z.B. Safe Zone)")]
+        [SerializeField] private List<EnvironmentScene> environmentScenes = new List<EnvironmentScene>();
+
         [Header("Umgebung")]
         [Tooltip("Optional, aber für den fertigen Build empfohlen: ein Material mit Shader 'Universal Render Pipeline/Unlit', " +
                  "Alpha Clipping AN und Render Face 'Both'. Leer = wird automatisch erzeugt (funktioniert sicher im Editor).")]
         [SerializeField] private Material propMaterial;
 
         public IReadOnlyList<Chapter> Chapters => chapters;
+
+        // Bremsende Busch-Flächen im aktuellen Level (Mittelpunkt + Radius) - reine Abstandsprüfung, keine Collider.
+        private readonly List<Vector3> _bushPositions = new List<Vector3>();
+        private readonly List<float> _bushRadii = new List<float>();
+        private float _bushSpeedMultiplier = 1f;
+
+        // Tatsächlich benutztes Spielfeld der aktuellen Szene (aus Map Settings oder automatisch vom Boden erkannt).
+        private Vector3 _mapCenter;
+        private Vector2 _mapSize;
 
         public int CurrentChapterIndex { get; private set; } = -1;
         public int CurrentLevelIndex { get; private set; } = -1;
@@ -144,6 +193,26 @@ namespace RhythmWitchClone.Levels
             Instance = this;
             DontDestroyOnLoad(gameObject);
             SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnValidate()
+        {
+            foreach (Chapter chapter in chapters)
+            {
+                chapter.mapSettings?.FillDefaultsIfUninitialized();
+                foreach (Level level in chapter.levels)
+                {
+                    foreach (EnemySpawn spawn in level.enemies)
+                    {
+                        if (spawn.count == 0 && spawn.enemyPrefab == null) spawn.count = 1;
+                    }
+                }
+            }
+
+            foreach (EnvironmentScene environmentScene in environmentScenes)
+            {
+                environmentScene.mapSettings?.FillDefaultsIfUninitialized();
+            }
         }
 
         private void OnDestroy()
@@ -226,6 +295,43 @@ namespace RhythmWitchClone.Levels
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            _bushPositions.Clear();
+            _bushRadii.Clear();
+            _bushSpeedMultiplier = 1f;
+
+            StartCoroutine(BuildSceneNextFrame(scene));
+        }
+
+        /// <summary>
+        /// Wartet einen Frame, damit der Spieler in Start() schon seine gespeicherte Position
+        /// geladen hat - sonst würden Wald und Wände um die alte Startposition herum gebaut,
+        /// und der Spieler könnte danach mitten im Wald / hinter einer Wand landen.
+        /// </summary>
+        private IEnumerator BuildSceneNextFrame(Scene scene)
+        {
+            yield return null;
+            if (!scene.isLoaded) yield break;
+            BuildScene(scene);
+        }
+
+        private void BuildScene(Scene scene)
+        {
+
+            // Szenen wie die Safe Zone: nur Umgebung erzeugen, keine Gegner.
+            EnvironmentScene environmentScene = environmentScenes.Find(e => e.sceneName == scene.name);
+            if (environmentScene != null)
+            {
+                GameObject environmentRoot = new GameObject("GeneratedEnvironment");
+                SceneManager.MoveGameObjectToScene(environmentRoot, scene);
+                SetupCameraSorting();
+
+                PlayerController scenePlayer = FindFirstObjectByType<PlayerController>();
+                Vector3 scenePlayerPosition = scenePlayer != null ? scenePlayer.transform.position : environmentScene.mapSettings.mapCenter;
+
+                GenerateEnvironment(environmentScene.mapSettings, environmentRoot.transform, scenePlayerPosition, scene.name);
+                return;
+            }
+
             // Kein Level über die Level-Auswahl gestartet (z.B. Kapitel-Szene direkt im Editor
             // gestartet)? Dann zum Testen automatisch Level 1 des passenden Kapitels nehmen.
             if (CurrentChapterIndex < 0 || CurrentChapterIndex >= chapters.Count ||
@@ -254,12 +360,72 @@ namespace RhythmWitchClone.Levels
             PlayerController player = FindFirstObjectByType<PlayerController>();
             Vector3 playerPosition = player != null ? player.transform.position : chapter.mapSettings.mapCenter;
 
-            GenerateEnvironment(chapter.mapSettings, root.transform, playerPosition);
+            GenerateEnvironment(chapter.mapSettings, root.transform, playerPosition, chapter.chapterName);
             SpawnEnemies(chapter.levels[CurrentLevelIndex], chapter.mapSettings, root.transform, playerPosition);
         }
 
-        private void GenerateEnvironment(MapSettings map, Transform root, Vector3 playerPosition)
+        /// <summary>
+        /// Tempo-Faktor an einer Position: in einem Busch kleiner als 1 (bremst), sonst 1.
+        /// Wird von PlayerController und EnemyController beim Bewegen abgefragt.
+        /// </summary>
+        public float GetSpeedMultiplierAt(Vector3 worldPosition)
         {
+            for (int i = 0; i < _bushPositions.Count; i++)
+            {
+                Vector3 difference = worldPosition - _bushPositions[i];
+                difference.y = 0f;
+                if (difference.sqrMagnitude <= _bushRadii[i] * _bushRadii[i])
+                {
+                    return _bushSpeedMultiplier;
+                }
+            }
+            return 1f;
+        }
+
+        /// <summary>
+        /// Legt das Spielfeld für diese Szene fest: entweder automatisch aus dem Boden unter dem
+        /// Spieler (größter Collider direkt unter ihm), oder aus Map Center / Map Size.
+        /// Muss vor GenerateEnvironment und SpawnEnemies aufgerufen werden.
+        /// </summary>
+        private void PrepareMapArea(MapSettings map, Vector3 playerPosition, string displayName)
+        {
+            _mapCenter = map.mapCenter;
+            _mapSize = map.mapSize;
+
+            if (!map.autoDetectGround) return;
+
+            RaycastHit[] hits = Physics.RaycastAll(playerPosition + Vector3.up * 5f, Vector3.down, 100f, ~0, QueryTriggerInteraction.Ignore);
+            Collider bestGround = null;
+            float bestArea = 0f;
+            foreach (RaycastHit hit in hits)
+            {
+                if (hit.collider is CharacterController) continue; // Spieler / Gegner selbst
+                Bounds b = hit.collider.bounds;
+                float area = b.size.x * b.size.z;
+                if (area > bestArea)
+                {
+                    bestArea = area;
+                    bestGround = hit.collider;
+                }
+            }
+
+            if (bestGround == null)
+            {
+                Debug.LogWarning($"LevelManager: '{displayName}' - kein Boden mit Collider unter dem Spieler gefunden, benutze Map Center / Map Size.");
+                return;
+            }
+
+            Bounds ground = bestGround.bounds;
+            _mapCenter = new Vector3(ground.center.x, ground.max.y, ground.center.z);
+            _mapSize = new Vector2(ground.size.x, ground.size.z);
+        }
+
+        private void GenerateEnvironment(MapSettings map, Transform root, Vector3 playerPosition, string displayName)
+        {
+            // Sicherstellen, dass alle Collider der frisch geladenen Szene für die Abstandsprüfung bekannt sind.
+            Physics.SyncTransforms();
+            PrepareMapArea(map, playerPosition, displayName);
+
             Quaternion cameraRotation = Camera.main != null ? Camera.main.transform.rotation : Quaternion.identity;
 
             Transform forestParent = new GameObject("Forest").transform;
@@ -267,13 +433,12 @@ namespace RhythmWitchClone.Levels
             Transform propsParent = new GameObject("Props").transform;
             propsParent.SetParent(root, false);
 
-            float halfX = map.mapSize.x * 0.5f;
-            float halfZ = map.mapSize.y * 0.5f;
+            float halfX = _mapSize.x * 0.5f;
+            float halfZ = _mapSize.y * 0.5f;
 
-            Chapter currentChapter = chapters[CurrentChapterIndex];
-            if (map.treeSprites.Count == 0) Debug.LogWarning($"LevelManager: Kapitel '{currentChapter.chapterName}' hat keine Tree Sprites eingetragen.");
-            if (map.rockSprites.Count == 0) Debug.LogWarning($"LevelManager: Kapitel '{currentChapter.chapterName}' hat keine Rock Sprites eingetragen.");
-            if (map.bushSprites.Count == 0) Debug.LogWarning($"LevelManager: Kapitel '{currentChapter.chapterName}' hat keine Bush Sprites eingetragen.");
+            if (map.treeSprites.Count == 0) Debug.LogWarning($"LevelManager: '{displayName}' hat keine Tree Sprites eingetragen.");
+            if (map.rockSprites.Count == 0) Debug.LogWarning($"LevelManager: '{displayName}' hat keine Rock Sprites eingetragen.");
+            if (map.bushSprites.Count == 0) Debug.LogWarning($"LevelManager: '{displayName}' hat keine Bush Sprites eingetragen.");
 
             // Wald: unregelmäßiges Raster, nur im Randstreifen. Die innere Waldkante ist per Rauschen
             // gewellt und wird zur Lichtung hin lichter, damit sie natürlich statt wie eine Mauer aussieht.
@@ -292,6 +457,11 @@ namespace RhythmWitchClone.Levels
                         float localDepth = map.forestDepth * (1f + map.forestEdgeWaviness * noise);
                         if (distanceToEdge > localDepth) continue;
 
+                        // Nie direkt auf/neben den Spieler, sonst steckt er fest.
+                        Vector3 flatToPlayer = (_mapCenter + new Vector3(x, 0f, z)) - playerPosition;
+                        flatToPlayer.y = 0f;
+                        if (flatToPlayer.magnitude < map.clearRadiusAroundPlayer + 1f) continue;
+
                         // Im inneren Drittel des Waldstreifens nach und nach lichter werden.
                         float depthRatio = distanceToEdge / localDepth;
                         if (depthRatio > 0.66f)
@@ -301,7 +471,7 @@ namespace RhythmWitchClone.Levels
                         }
 
                         float offset = map.treeSpacing * 0.5f * map.treeRandomOffset;
-                        Vector3 position = map.mapCenter + new Vector3(
+                        Vector3 position = _mapCenter + new Vector3(
                             x + UnityEngine.Random.Range(-offset, offset),
                             0f,
                             z + UnityEngine.Random.Range(-offset, offset));
@@ -333,15 +503,24 @@ namespace RhythmWitchClone.Levels
                 if (TryGetInteriorPoint(map, playerPosition, map.clearRadiusAroundPlayer, out Vector3 position))
                 {
                     float height = UnityEngine.Random.Range(map.bushHeightRange.x, map.bushHeightRange.y);
-                    SpawnProp(map.bushSprites, position, height, map, propsParent, cameraRotation, "Bush");
+                    GameObject bush = SpawnProp(map.bushSprites, position, height, map, propsParent, cameraRotation, "Bush");
+
+                    SpriteRenderer bushRenderer = bush.GetComponentInChildren<SpriteRenderer>();
+                    if (bushRenderer != null)
+                    {
+                        _bushPositions.Add(position);
+                        _bushRadii.Add(bushRenderer.bounds.extents.x * map.bushSlowAreaSize);
+                    }
                 }
             }
 
+            _bushSpeedMultiplier = map.bushSpeedMultiplier;
+
             if (map.addOuterWall) CreateOuterWalls(map, root);
-            CreateWalkableAreaWalls(map, root);
+            CreateWalkableAreaWalls(map, root, playerPosition);
 
             Debug.Log($"LevelManager: {forestParent.childCount} Bäume und {propsParent.childCount} Steine/Büsche erzeugt " +
-                      $"(Spielfeld-Mitte {map.mapCenter}, Größe {map.mapSize}, Kamera gefunden: {Camera.main != null}).");
+                      $"(Spielfeld-Mitte {_mapCenter}, Größe {_mapSize}, Kamera gefunden: {Camera.main != null}).");
         }
 
         /// <summary>
@@ -417,17 +596,28 @@ namespace RhythmWitchClone.Levels
 
             for (int attempt = 0; attempt < 30; attempt++)
             {
-                point = map.mapCenter + new Vector3(
+                point = _mapCenter + new Vector3(
                     UnityEngine.Random.Range(minX, maxX),
                     0f,
                     UnityEngine.Random.Range(minZ, maxZ));
 
                 Vector3 flatDifference = point - playerPosition;
                 flatDifference.y = 0f;
-                if (flatDifference.magnitude >= minDistanceFromPlayer) return true;
+                if (flatDifference.magnitude < minDistanceFromPlayer) continue;
+
+                // Nicht in/an Gebäuden, Portal, Shop, Bäumen usw. (alles mit Collider, auch Trigger-Zonen).
+                // Kugel liegt knapp über dem Boden, damit der Boden selbst nicht mitzählt.
+                if (map.objectClearance > 0f)
+                {
+                    float radius = map.objectClearance;
+                    Vector3 checkCenter = point + Vector3.up * (radius + 0.1f);
+                    if (Physics.CheckSphere(checkCenter, radius, ~0, QueryTriggerInteraction.Collide)) continue;
+                }
+
+                return true;
             }
 
-            point = map.mapCenter;
+            point = _mapCenter;
             return false;
         }
 
@@ -437,8 +627,8 @@ namespace RhythmWitchClone.Levels
         /// </summary>
         private void GetInteriorBounds(MapSettings map, float edgeInset, out float minX, out float maxX, out float minZ, out float maxZ)
         {
-            float innerHalfX = Mathf.Max(0.5f, map.mapSize.x * 0.5f - edgeInset);
-            float innerHalfZ = Mathf.Max(0.5f, map.mapSize.y * 0.5f - edgeInset);
+            float innerHalfX = Mathf.Max(0.5f, _mapSize.x * 0.5f - edgeInset);
+            float innerHalfZ = Mathf.Max(0.5f, _mapSize.y * 0.5f - edgeInset);
             minX = -innerHalfX; maxX = innerHalfX;
             minZ = -innerHalfZ; maxZ = innerHalfZ;
 
@@ -463,21 +653,31 @@ namespace RhythmWitchClone.Levels
         /// Waldkante (so läuft man nicht in den dichten Wald hinein), unten zusätzlich um
         /// Bottom Boundary Offset nach innen versetzt (damit man nicht hinter den vorderen Bäumen verschwindet).
         /// </summary>
-        private void CreateWalkableAreaWalls(MapSettings map, Transform root)
+        private void CreateWalkableAreaWalls(MapSettings map, Transform root, Vector3 playerPosition)
         {
             const float wallHeight = 10f;
             const float wallThickness = 1f;
 
             GetInteriorBounds(map, map.forestDepth, out float minX, out float maxX, out float minZ, out float maxZ);
+
+            // Sicherheit: Steht der Spieler außerhalb des begehbaren Bereichs, KEINE Wände bauen - sonst wäre er eingesperrt.
+            Vector3 local = playerPosition - _mapCenter;
+            if (local.x < minX || local.x > maxX || local.z < minZ || local.z > maxZ)
+            {
+                Debug.LogWarning("LevelManager: Spieler startet außerhalb des begehbaren Bereichs (zu nah am Rand / im Wald) - " +
+                                 "unsichtbare Wände wurden weggelassen. Spieler weiter in die Mitte setzen oder Forest Depth / Bottom Boundary Offset verkleinern.");
+                return;
+            }
+
             float width = maxX - minX + wallThickness * 2f;
             float depth = maxZ - minZ;
             float centerX = (minX + maxX) * 0.5f;
             float centerZ = (minZ + maxZ) * 0.5f;
 
-            CreateWall(root, map.mapCenter + new Vector3(centerX, wallHeight * 0.5f, minZ - wallThickness * 0.5f), new Vector3(width, wallHeight, wallThickness));
-            CreateWall(root, map.mapCenter + new Vector3(centerX, wallHeight * 0.5f, maxZ + wallThickness * 0.5f), new Vector3(width, wallHeight, wallThickness));
-            CreateWall(root, map.mapCenter + new Vector3(minX - wallThickness * 0.5f, wallHeight * 0.5f, centerZ), new Vector3(wallThickness, wallHeight, depth));
-            CreateWall(root, map.mapCenter + new Vector3(maxX + wallThickness * 0.5f, wallHeight * 0.5f, centerZ), new Vector3(wallThickness, wallHeight, depth));
+            CreateWall(root, _mapCenter + new Vector3(centerX, wallHeight * 0.5f, minZ - wallThickness * 0.5f), new Vector3(width, wallHeight, wallThickness));
+            CreateWall(root, _mapCenter + new Vector3(centerX, wallHeight * 0.5f, maxZ + wallThickness * 0.5f), new Vector3(width, wallHeight, wallThickness));
+            CreateWall(root, _mapCenter + new Vector3(minX - wallThickness * 0.5f, wallHeight * 0.5f, centerZ), new Vector3(wallThickness, wallHeight, depth));
+            CreateWall(root, _mapCenter + new Vector3(maxX + wallThickness * 0.5f, wallHeight * 0.5f, centerZ), new Vector3(wallThickness, wallHeight, depth));
         }
 
         private Vector3 GetFlatCameraForward()
@@ -509,13 +709,13 @@ namespace RhythmWitchClone.Levels
         {
             const float wallHeight = 10f;
             const float wallThickness = 1f;
-            float halfX = map.mapSize.x * 0.5f;
-            float halfZ = map.mapSize.y * 0.5f;
+            float halfX = _mapSize.x * 0.5f;
+            float halfZ = _mapSize.y * 0.5f;
 
-            CreateWall(root, map.mapCenter + new Vector3(0f, wallHeight * 0.5f, halfZ + wallThickness * 0.5f), new Vector3(map.mapSize.x + wallThickness * 2f, wallHeight, wallThickness));
-            CreateWall(root, map.mapCenter + new Vector3(0f, wallHeight * 0.5f, -halfZ - wallThickness * 0.5f), new Vector3(map.mapSize.x + wallThickness * 2f, wallHeight, wallThickness));
-            CreateWall(root, map.mapCenter + new Vector3(halfX + wallThickness * 0.5f, wallHeight * 0.5f, 0f), new Vector3(wallThickness, wallHeight, map.mapSize.y));
-            CreateWall(root, map.mapCenter + new Vector3(-halfX - wallThickness * 0.5f, wallHeight * 0.5f, 0f), new Vector3(wallThickness, wallHeight, map.mapSize.y));
+            CreateWall(root, _mapCenter + new Vector3(0f, wallHeight * 0.5f, halfZ + wallThickness * 0.5f), new Vector3(_mapSize.x + wallThickness * 2f, wallHeight, wallThickness));
+            CreateWall(root, _mapCenter + new Vector3(0f, wallHeight * 0.5f, -halfZ - wallThickness * 0.5f), new Vector3(_mapSize.x + wallThickness * 2f, wallHeight, wallThickness));
+            CreateWall(root, _mapCenter + new Vector3(halfX + wallThickness * 0.5f, wallHeight * 0.5f, 0f), new Vector3(wallThickness, wallHeight, _mapSize.y));
+            CreateWall(root, _mapCenter + new Vector3(-halfX - wallThickness * 0.5f, wallHeight * 0.5f, 0f), new Vector3(wallThickness, wallHeight, _mapSize.y));
         }
 
         private void CreateWall(Transform root, Vector3 center, Vector3 size)

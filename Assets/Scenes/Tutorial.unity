@@ -970,7 +970,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Mit Linksklick fortsetzen...
+  m_text: Mit Linksklick oder E fortsetzen...
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1220,7 +1220,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 65694ec8cc915bf42a78c68a9438a2a5, type: 2}
+  - {fileID: 2100000, guid: 7dd7409358b426f42aaf53ab3f9a28f8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1258,14 +1258,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1456054545}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 5.5571, y: 1, z: 6.9175}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 410385015}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1836807165
 GameObject:
   m_ObjectHideFlags: 0
@@ -1668,17 +1668,65 @@ MonoBehaviour:
   guideArrowHeightOffset: 2
   guideArrowOrbitRadius: 1.5
   introSlides:
-  - text: Die Bilder, die du bisher in den Intro-Slides eingetragen hattest, musst
-      du neu eintragen, weil aus dem einzelnen Bildfeld eine Liste geworden ist.
+  - text: "Es war einmal eine Welt, in der alles einen eigenen Klang hatte. Der Wind
+      summte, die Fl\xFCsse sangen, und selbst die Steine brummten leise im Takt.
+      Man nannte sie Harmonia."
     images:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
-  - text: Jeder Schritt hat jetzt das Feld Dialogue Panel Position. Dort ziehst du
-      einen Platzhalter rein, und das Panel wandert bei diesem Schritt sanft dorthin.
+  - text: "Wer den Rhythmus der Welt h\xF6ren konnte, konnte ihn auch lenken. Diese
+      Menschen nannte man Rhythmanten. Mit jedem Ton, den sie perfekt im Takt spielten,
+      formten sie Magie."
     images:
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
-  - text: "Im Canvas f\xFCr jede gew\xFCnschte Position ein Empty GameObject anlegen
-      (Rechtsklick auf Canvas \u2192 Create Empty, bekommt automatisch einen RectTransform)."
+  - text: Im Herzen von Harmonia stand der Ewige Taktgeber. Er gab der ganzen Welt
+      ihren Rhythmus vor, Tag und Nacht, seit Anbeginn der Zeit.
+    images:
+    - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+  - text: "Doch eines Nachts verstummte er. Ein schriller, falscher Ton zerriss die
+      Stille, und der Taktgeber zerbrach in unz\xE4hlige Splitter."
+    images:
+    - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+  - text: "Seitdem liegt die Dissonanz \xFCber dem Land. Die Gesch\xF6pfe, die sie
+      ber\xFChrt, verlieren ihren Takt und werden wild und feindselig. W\xE4lder,
+      W\xFCsten und St\xE4dte versinken nach und nach im Chaos."
+    images:
+    - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+  - text: "Die meisten Rhythmanten sind verschwunden. Doch in einer kleinen Stube
+      sa\xDF ein junger Komponist, der den alten Takt noch immer h\xF6ren konnte,
+      leise, aber deutlich. Du."
+    images:
+    - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+  - text: "In derselben Nacht landete ein Splitter des Taktgebers vor deinen F\xFC\xDFen.
+      Als du ihn ber\xFChrt hast, durchstr\xF6mte dich die Musik der alten Welt.
+      Der Splitter hatte dich gew\xE4hlt."
+    images:
+    - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+  - text: Aber Musik allein besiegt die Dissonanz nicht. Bevor du dich hinauswagst,
+      musst du lernen, deinen Takt zu halten, deine Kraft zu lenken und dich zu verteidigen.
+    images:
+    - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+  - text: "Hier, auf diesem alten \xDCbungsplatz der Rhythmanten, beginnt deine Reise.
+      Finde die Splitter, stelle den Ewigen Taktgeber wieder her und bring Harmonia
+      seinen Rhythmus zur\xFCck."
     images:
     - {fileID: -439970112, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
@@ -7789,12 +7837,24 @@ MonoBehaviour:
   knockbackForce: 0
   knockbackDuration: 0.25
   maxHealth: 20
-  hitKnockbackForce: 0
-  hitKnockbackDuration: 0.15
+  hitLaunchForce: 14
+  hitLaunchDuration: 0.4
+  hitLaunchHopHeight: 0.5
+  hitLeanAngle: 30
+  hitStopDuration: 0.07
+  hitDamageForceScaling: 1
   damageTextColor: {r: 1, g: 0, b: 0, a: 1}
   damageTextFontSize: 4
   damageTextHeight: 2
   damageTextLifetime: 0.8
+  hitFlashColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  hitFlashDuration: 0.15
+  hitSquashAmount: 0.3
+  hitSquashDuration: 0.3
+  hitShakeStrength: 0.12
+  hitShakeDuration: 0.2
+  hitStaggerDuration: 0.2
+  deathAnimationDuration: 0.4
   visualTransform: {fileID: 5131340937974062494}
 --- !u!224 &5072324097500059123
 RectTransform:

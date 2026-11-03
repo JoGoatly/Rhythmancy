@@ -122,9 +122,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e06110dd3cd934c4b8617c7a9a4f804e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 2800000, guid: 2c01b4d2f47525440ae2cee619362624, type: 3}
+  texture: {fileID: 2800000, guid: febea12aa4b37f3489a28f4bfcbf3569, type: 3}
   targetCamera: {fileID: 0}
   matchCameraRotation: 1
+  enableMovementTilt: 1
+  tiltAmplitudeDegrees: 6
+  tiltFrequency: 8
+  tiltSmoothSpeed: 10
 --- !u!1 &2781122862677714322
 GameObject:
   m_ObjectHideFlags: 0
@@ -203,4 +207,23 @@ MonoBehaviour:
   attackCooldown: 1
   knockbackForce: 6
   knockbackDuration: 0.25
+  maxHealth: 50
+  hitLaunchForce: 14
+  hitLaunchDuration: 0.4
+  hitLaunchHopHeight: 0.5
+  hitLeanAngle: 30
+  hitStopDuration: 0.07
+  hitDamageForceScaling: 1
+  damageTextColor: {r: 1, g: 0, b: 0, a: 1}
+  damageTextFontSize: 4
+  damageTextHeight: 2
+  damageTextLifetime: 0.8
+  hitFlashColor: {r: 1, g: 0.25, b: 0.25, a: 1}
+  hitFlashDuration: 0.15
+  hitSquashAmount: 0.3
+  hitSquashDuration: 0.3
+  hitShakeStrength: 0.12
+  hitShakeDuration: 0.2
+  hitStaggerDuration: 0.2
+  deathAnimationDuration: 0.4
   visualTransform: {fileID: 0}
