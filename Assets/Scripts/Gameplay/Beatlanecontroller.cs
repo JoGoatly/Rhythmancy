@@ -66,6 +66,15 @@ namespace RhythmWitchClone.Gameplay
         [Tooltip("Schläge pro Minute. Die Geschwindigkeit wird automatisch so berechnet, dass bei gleichmäßigem Tastendruck exakt in diesem Takt IMMER eine Note auf der Hit-Zone steht - unabhängig von der Tasten-Anzahl.")]
         [SerializeField] private float beatsPerMinute = 120f;
 
+        [Header("Musik-Sync")]
+        [Tooltip("AN = die Noten laufen nicht mehr nach eigener Uhr, sondern exakt nach der Abspielposition der " +
+                 "aktuellen Musik (AudioManager). Jede Note trifft die Hit-Zone genau auf einem Schlag des Songs. " +
+                 "Beats Per Minute muss dafür dem Tempo des Songs entsprechen.")]
+        [SerializeField] private bool syncToMusic;
+        [Tooltip("Zeitpunkt (Sekunden) des ersten Schlags im Song. Zum Feinjustieren: Kommen die Noten zu früh " +
+                 "an der Hit-Zone an, Wert erhöhen - kommen sie zu spät, Wert verringern (auch negativ möglich).")]
+        [SerializeField] private float musicBeatOffset;
+
         [Header("Genauigkeit")]
         [Tooltip("Ab welchem Anteil der halben Icon-Größe (0-1) ein Treffer noch als 'Perfekt' zählt (0 = exakte Mitte).")]
         [SerializeField] private float perfectHitRatio = 0.3f;
@@ -104,6 +113,15 @@ namespace RhythmWitchClone.Gameplay
         private readonly List<LaneNote> _notes = new List<LaneNote>();
         private float _currentBasePosition;
         private float _moveSpeed;
+        private float _speedMultiplier = 1f; // z.B. Endlos-Modus: wird pro Welle schneller
+
+        // Musik-Sync: Schläge aus früheren Song-Durchläufen (damit die Noten beim Loop nicht springen)
+        private float _musicLoopBeats;
+        private float _lastSongBeats;
+        private AudioClip _lastSyncedClip;
+
+        /// <summary>True, wenn die Noten gerade der Musik folgen (Sync an UND es läuft Musik).</summary>
+        public bool IsSyncedToMusic => syncToMusic && GetSyncMusicSource() != null;
         private float _laneLength;
         private PlayerController _player; // für den Projektil-Abschuss bei Treffer, automatisch vom selben GameObject geholt
         private KeyControl[] _resolvedKeyControls;
@@ -188,6 +206,14 @@ namespace RhythmWitchClone.Gameplay
         /// (Reihenfolge im Inspector = Reihenfolge, in der neue Tasten dazukommen). 0 = alle.
         /// Noten mit einer Taste, die gerade nicht mehr erlaubt ist, bekommen sofort eine neue.
         /// </summary>
+        /// <summary>Tempo-Faktor für die Noten (1 = normal, 1.3 = 30 % schneller). Wirkt sofort.</summary>
+        public void SetSpeedMultiplier(float multiplier)
+        {
+            _speedMultiplier = Mathf.Max(0.1f, multiplier);
+        }
+
+        public float SpeedMultiplier => _speedMultiplier;
+
         public void SetActiveKeyCount(int count)
         {
             _activeKeyCount = Mathf.Max(0, count);
@@ -278,7 +304,10 @@ namespace RhythmWitchClone.Gameplay
         {
             if (_laneLength <= 0f) return;
 
-            _currentBasePosition = Mathf.Repeat(_currentBasePosition + _moveSpeed * Time.deltaTime, _laneLength);
+            if (!TryUpdateBasePositionFromMusic())
+            {
+                _currentBasePosition = Mathf.Repeat(_currentBasePosition + _moveSpeed * _speedMultiplier * Time.deltaTime, _laneLength);
+            }
 
             float hitZonePosition = GetHitZonePosition();
 
@@ -331,6 +360,51 @@ namespace RhythmWitchClone.Gameplay
         /// Berücksichtigung des Umlaufs (analog zu Mathf.DeltaAngle, nur für eine lineare Schleife
         /// statt Grad 0-360).
         /// </summary>
+        private AudioSource GetSyncMusicSource()
+        {
+            if (AudioManager.Instance == null) return null;
+            AudioSource source = AudioManager.Instance.MusicSource;
+            return source != null && source.clip != null && source.isPlaying ? source : null;
+        }
+
+        /// <summary>
+        /// Musik-Sync: Position der Noten direkt aus der Abspielzeit des Songs berechnen.
+        /// Jede Note steht genau dann auf der Hit-Zone, wenn im Song ein Schlag ist.
+        /// Wird der Song schneller abgespielt (pitch, z.B. Endlos-Modus), laufen die Noten automatisch mit.
+        /// False = kein Sync möglich (aus, keine Musik, pausiert) -> normale Bewegung.
+        /// </summary>
+        private bool TryUpdateBasePositionFromMusic()
+        {
+            if (!syncToMusic) return false;
+            AudioSource music = GetSyncMusicSource();
+            if (music == null) return false;
+            if (Time.timeScale <= 0f) return true; // pausiert: Noten bleiben stehen
+
+            // neuer Song -> Zählung zurücksetzen
+            if (music.clip != _lastSyncedClip)
+            {
+                _lastSyncedClip = music.clip;
+                _musicLoopBeats = 0f;
+                _lastSongBeats = 0f;
+            }
+
+            float songTime = music.timeSamples / (float)music.clip.frequency; // genauer als music.time
+            float songBeats = (songTime - musicBeatOffset) * beatsPerMinute / 60f;
+
+            // Song ist von vorne gestartet (Loop): bisherige Schläge aufaddieren, damit nichts springt
+            if (songBeats < _lastSongBeats - 1f)
+            {
+                _musicLoopBeats += Mathf.Ceil(_lastSongBeats);
+            }
+            _lastSongBeats = songBeats;
+
+            int count = Mathf.Max(1, _notes.Count);
+            float spacing = _laneLength / count;
+            float totalBeats = _musicLoopBeats + songBeats;
+            _currentBasePosition = Mathf.Repeat(GetHitZonePosition() + totalBeats * spacing, _laneLength);
+            return true;
+        }
+
         private float GetShortestDistance(float position, float target)
         {
             return Mathf.Repeat(position - target + _laneLength / 2f, _laneLength) - _laneLength / 2f;

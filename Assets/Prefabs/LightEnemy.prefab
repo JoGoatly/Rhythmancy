@@ -202,7 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 3
   gravity: -9.81
-  attackRange: 1.5
+  attackRange: 1.2
   damage: 10
   attackCooldown: 1
   knockbackForce: 6

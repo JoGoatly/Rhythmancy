@@ -8809,7 +8809,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &12807147150014923
 RectTransform:
   m_ObjectHideFlags: 0
@@ -11602,9 +11602,10 @@ MonoBehaviour:
   coinMoveSpeed: 4
   coinCollectDistance: 0.5
   coinCountText: {fileID: 2495710158314017366}
-  healthOrbTexture: {fileID: 0}
-  manaOrbTexture: {fileID: 0}
+  healthOrbPrefab: {fileID: 0}
+  manaOrbPrefab: {fileID: 0}
   orbScale: 0.45
+  orbHoverHeight: 0.5
   healthOrbDropChance: 0.06
   manaOrbDropChance: 0.06
   healthOrbAmount: 25

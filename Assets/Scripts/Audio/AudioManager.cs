@@ -35,6 +35,31 @@ namespace RhythmWitchClone.Audio
         [Tooltip("Exakter Szenen-Name (Datei ohne .unity) des Hauptmenüs - ausschließlich dort spielt mainMenuMusic.")]
         [SerializeField] private string mainMenuSceneName = "MainMenu";
 
+        [System.Serializable]
+        public class SceneMusic
+        {
+            [Tooltip("Exakter Szenen-Name (Datei ohne .unity), z.B. TDOTLevel.")]
+            public string sceneName;
+            [Tooltip("Läuft in dieser Szene in Dauerschleife (statt der normalen Spiel-Playlist).")]
+            public AudioClip music;
+        }
+
+        [Header("Eigene Musik für bestimmte Szenen")]
+        [Tooltip("Pro Eintrag: Szenen-Name + Musik. Z.B. Szene 'TDOTLevel' mit eigener Musik.")]
+        [SerializeField] private List<SceneMusic> sceneMusic = new List<SceneMusic>();
+
+        [Header("Game-Over-Musik")]
+        [Tooltip("Läuft in Dauerschleife, sobald der Game-Over- bzw. Highscore/Leaderboard-Bildschirm erscheint. Leer = die bisherige Musik läuft einfach weiter.")]
+        [SerializeField] private AudioClip gameOverMusic;
+
+        [Header("Tutorial-Musik")]
+        [Tooltip("Exakter Szenen-Name (Datei ohne .unity) der Tutorial-Szene.")]
+        [SerializeField] private string tutorialSceneName = "Tutorial";
+        [Tooltip("Läuft in Dauerschleife, solange das Intro (Vorgeschichte) in der Tutorial-Szene läuft. Leer = Stille während des Intros.")]
+        [SerializeField] private AudioClip tutorialIntroMusic;
+        [Tooltip("Läuft in Dauerschleife in der Tutorial-Szene, sobald das Intro vorbei ist. Leer = normale Spiel-Playlist.")]
+        [SerializeField] private AudioClip tutorialMusic;
+
         // Eigene AudioSource des AudioManagers, ausschließlich für die automatische Musik-Wiedergabe.
         // Ist die EINZIGE AudioSource, die als Musik gilt (siehe ApplyVolumeToSource).
         private AudioSource _musicPlaybackSource;
@@ -108,6 +133,7 @@ namespace RhythmWitchClone.Audio
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             // Neue Szene = evtl. neue AudioSources (z.B. Level-Musik, Ambiente-SFX).
+            _musicPlaybackSource.pitch = 1f; // evtl. beschleunigte Musik (Endlos-Modus) zurücksetzen
             RefreshKnownAudioSources();
             ApplyVolumes();
             PlayMusicForScene(scene.name);
@@ -126,10 +152,35 @@ namespace RhythmWitchClone.Audio
             {
                 PlaySingleLoopingTrack(mainMenuMusic);
             }
+            else if (TryGetSceneMusic(sceneName, out AudioClip customMusic))
+            {
+                // Läuft dieselbe Musik schon (z.B. nach "Nochmal"), einfach weiterlaufen lassen statt neu zu starten
+                if (_musicPlaybackSource.clip != customMusic || !_musicPlaybackSource.isPlaying) PlaySingleLoopingTrack(customMusic);
+            }
+            else if (sceneName == tutorialSceneName)
+            {
+                // Tutorial startet immer mit der Intro-Musik. Der TutorialManager ruft
+                // PlayTutorialMusic() auf, sobald das Intro vorbei ist (oder sofort, falls es keins gibt).
+                PlaySingleLoopingTrack(tutorialIntroMusic);
+            }
             else
             {
                 StartPlaylist();
             }
+        }
+
+        private bool TryGetSceneMusic(string sceneName, out AudioClip clip)
+        {
+            clip = null;
+            foreach (SceneMusic entry in sceneMusic)
+            {
+                if (entry != null && entry.music != null && entry.sceneName == sceneName)
+                {
+                    clip = entry.music;
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void PlaySingleLoopingTrack(AudioClip clip)
@@ -174,6 +225,36 @@ namespace RhythmWitchClone.Audio
             _musicPlaybackSource.loop = false; // Update() erkennt Track-Ende nur, wenn loop = false ist
             _musicPlaybackSource.Play();
             _isMusicPaused = false;
+        }
+
+        /// <summary>
+        /// Wechselt zur Game-Over-Musik (Game-Over- bzw. Highscore-Bildschirm). Normales Tempo,
+        /// auch wenn die Musik vorher beschleunigt war. Ohne eingetragene Musik passiert nichts.
+        /// </summary>
+        public void PlayGameOverMusic()
+        {
+            if (gameOverMusic == null) return;
+            if (_musicPlaybackSource.clip == gameOverMusic && _musicPlaybackSource.isPlaying) return;
+
+            _musicPlaybackSource.pitch = 1f;
+            PlaySingleLoopingTrack(gameOverMusic);
+        }
+
+        /// <summary>
+        /// Wechselt in der Tutorial-Szene von der Intro-Musik zur Tutorial-Musik.
+        /// Wird vom TutorialManager aufgerufen, sobald das Intro endet. Läuft die Tutorial-Musik
+        /// schon, passiert nichts (kein Neustart).
+        /// </summary>
+        public void PlayTutorialMusic()
+        {
+            if (tutorialMusic == null)
+            {
+                if (_currentPlaylistIndex < 0) StartPlaylist();
+                return;
+            }
+
+            if (_musicPlaybackSource.clip == tutorialMusic && _musicPlaybackSource.isPlaying) return;
+            PlaySingleLoopingTrack(tutorialMusic);
         }
 
         /// <summary>
@@ -230,6 +311,18 @@ namespace RhythmWitchClone.Audio
         }
 
         public bool IsMusicPaused() => _isMusicPaused;
+
+        /// <summary>Die AudioSource der Musik (z.B. damit die Beat-Lane sich mit dem Song synchronisieren kann).</summary>
+        public AudioSource MusicSource => _musicPlaybackSource;
+
+        /// <summary>
+        /// Abspielgeschwindigkeit der Musik (1 = normal, 1.2 = 20 % schneller und etwas höher).
+        /// Wird beim Szenenwechsel automatisch wieder auf 1 gesetzt.
+        /// </summary>
+        public void SetMusicPitch(float pitch)
+        {
+            _musicPlaybackSource.pitch = Mathf.Clamp(pitch, 0.5f, 3f);
+        }
 
         /// <summary>
         /// Sucht alle AudioSources in der aktuell geladenen Szene(n) und merkt sich ihre
@@ -296,6 +389,10 @@ namespace RhythmWitchClone.Audio
         [Header("Sound-Effekte")]
         [Tooltip("Wird abgespielt, wenn der Spieler eine Münze einsammelt.")]
         [SerializeField] private AudioClip coinPickupSfx;
+        [Tooltip("Wird abgespielt, wenn der Spieler einen grünen Lebens-Orb einsammelt.")]
+        [SerializeField] private AudioClip healthOrbPickupSfx;
+        [Tooltip("Wird abgespielt, wenn der Spieler einen blauen Mana-Orb einsammelt.")]
+        [SerializeField] private AudioClip manaOrbPickupSfx;
         [Tooltip("Wird abgespielt, wenn der Spieler ein Projektil abfeuert.")]
         [SerializeField] private AudioClip projectileFiredSfx;
         [Tooltip("Wird abgespielt, wenn der Spieler Schaden nimmt.")]
@@ -321,6 +418,8 @@ namespace RhythmWitchClone.Audio
         [SerializeField] private AudioClip missHitSfx;
 
         public void PlayCoinPickupSound(Vector3 position) => PlaySFX(coinPickupSfx, position);
+        public void PlayHealthOrbPickupSound(Vector3 position) => PlaySFX(healthOrbPickupSfx, position);
+        public void PlayManaOrbPickupSound(Vector3 position) => PlaySFX(manaOrbPickupSfx, position);
         public void PlayProjectileFiredSound(Vector3 position) => PlaySFX(projectileFiredSfx, position);
         public void PlayPlayerDamagedSound(Vector3 position) => PlaySFX(playerDamagedSfx, position);
         public void PlayEnemyDamagedSound(Vector3 position) => PlaySFX(enemyDamagedSfx, position);

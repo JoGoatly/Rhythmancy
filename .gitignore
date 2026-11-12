@@ -1,3 +1,47 @@
+# --- bisherige Einträge ---
 **/PackageCache/
 **/Artifacts/
 .vs/
+
+# --- Unity: automatisch erzeugte Ordner (gehören nie ins Repo) ---
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/[Ll]ogs/
+**/[Uu]ser[Ss]ettings/
+**/[Mm]emoryCaptures/
+**/[Rr]ecordings/
+
+# --- IDE / Visual Studio / Rider ---
+**/.vs/
+**/.vscode/
+**/.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# --- Unity-Zwischendateien & Builds ---
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+crashlytics-build.properties
+
+# --- Betriebssystem ---
+.DS_Store
+Thumbs.db

@@ -167,6 +167,13 @@ namespace RhythmWitchClone.Gameplay
             if (continuePromptUI != null) continuePromptUI.SetActive(false);
             HideAllMarkers();
 
+            // Tutorial-Gegner sind Trainings-Dummys: bewegen sich nicht und machen keinen Schaden
+            // (Schaden kommt nur vom geworfenen Gegenstand nach ihrem Tod).
+            foreach (TutorialStep step in steps)
+            {
+                if (step.enemyToDefeat != null) step.enemyToDefeat.SetTrainingDummy(true);
+            }
+
             // Bewegung ist zu Beginn gesperrt - wird erst durch einen Schritt mit "Unlocks Movement" freigeschaltet.
             if (player != null)
             {
@@ -182,6 +189,7 @@ namespace RhythmWitchClone.Gameplay
             else
             {
                 if (introPanel != null) introPanel.SetActive(false);
+                if (AudioManager.Instance != null) AudioManager.Instance.PlayTutorialMusic(); // kein Intro -> gleich Tutorial-Musik
                 ShowStep(0);
             }
         }
@@ -407,6 +415,7 @@ namespace RhythmWitchClone.Gameplay
 
             _inIntro = false;
             StopVoice();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayTutorialMusic(); // Intro-Musik -> Tutorial-Musik
             if (introPanel != null) introPanel.SetActive(false);
             if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
 
@@ -756,6 +765,7 @@ namespace RhythmWitchClone.Gameplay
             _inIntro = false;
             _isTyping = false;
             StopVoice();
+            if (AudioManager.Instance != null) AudioManager.Instance.PlayTutorialMusic();
             if (introPanel != null) introPanel.SetActive(false);
             if (introContinuePrompt != null) introContinuePrompt.SetActive(false);
             if (dialoguePanel != null) dialoguePanel.SetActive(false);

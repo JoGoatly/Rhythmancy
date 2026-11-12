@@ -46,6 +46,11 @@ namespace RhythmWitchClone.Gameplay
         [SerializeField] private int maxHealth = 50;
         private int _currentHealth;
 
+        [Header("Trainings-Dummy (Tutorial)")]
+        [Tooltip("AN = bewegt sich nicht, greift nicht an und wird nicht weggeschleudert - reagiert nur optisch auf Treffer. " +
+                 "Wird für den Tutorial-Gegner automatisch vom TutorialManager eingeschaltet.")]
+        [SerializeField] private bool isTrainingDummy;
+
         [Header("Rückschlag (durch einen Spieler-Treffer)")]
         [Tooltip("Wie kraftvoll der Gegner bei einem Treffer weggeschleudert wird.")]
         [SerializeField] private float hitLaunchForce = 14f;
@@ -184,6 +189,13 @@ namespace RhythmWitchClone.Gameplay
 
             if (_player == null) return;
 
+            if (isTrainingDummy)
+            {
+                // Steht still: keine Verfolgung, kein Angriff, kein Rückstoß - nur Schwerkraft.
+                ApplyGravity();
+                _controller.Move(Vector3.up * _verticalVelocity.y * Time.deltaTime);
+                return;
+            }
 
             if (_attackCooldownTimer > 0f)
             {
@@ -337,7 +349,7 @@ namespace RhythmWitchClone.Gameplay
             CacheBaseColor();
 
             // Der Todestreffer schleudert den Gegner zusätzlich weg (ohne Hitbox, rein optisch).
-            _deathVelocity = knockDirection.sqrMagnitude > 0.0001f ? knockDirection.normalized * force : Vector3.zero;
+            _deathVelocity = knockDirection.sqrMagnitude > 0.0001f && !isTrainingDummy ? knockDirection.normalized * force : Vector3.zero;
             _launchScreenSign = GetScreenSign(knockDirection);
 
             if (_controller != null) _controller.enabled = false;
@@ -427,9 +439,15 @@ namespace RhythmWitchClone.Gameplay
         /// ihn zusätzlich kurz in die übergebene Richtung weg - für Spieler-Spezialfähigkeiten
         /// wie eine Schockwelle.
         /// </summary>
+        /// <summary>Macht diesen Gegner zum Trainings-Dummy (siehe isTrainingDummy).</summary>
+        public void SetTrainingDummy(bool value)
+        {
+            isTrainingDummy = value;
+        }
+
         public void ApplyStun(Vector3 knockbackDirection, float knockbackForce, float stunDuration)
         {
-            if (_isDying) return;
+            if (_isDying || isTrainingDummy) return;
             _stunTimer = stunDuration;
             TriggerKnockback(knockbackDirection, knockbackForce, hitLaunchDuration);
         }
@@ -523,7 +541,7 @@ namespace RhythmWitchClone.Gameplay
             }
 
             TriggerHitReaction();
-            TriggerKnockback(knockDirection, force, hitLaunchDuration, true);
+            if (!isTrainingDummy) TriggerKnockback(knockDirection, force, hitLaunchDuration, true);
         }
 
         /// <summary>

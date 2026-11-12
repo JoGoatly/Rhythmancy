@@ -108,7 +108,7 @@ namespace RhythmWitchClone.UI.Pause
 
         private void Update()
         {
-            if (!_isGameOver && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            if (!_isGameOver && !BlockPauseInput && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
             {
                 TogglePause();
             }
@@ -129,6 +129,12 @@ namespace RhythmWitchClone.UI.Pause
         /// </summary>
         public static bool UseCustomGameOverScreen;
 
+        /// <summary>
+        /// True = Escape öffnet das Pause-Menü gerade nicht (z.B. während die Upgrade-Auswahl
+        /// im Endlos-Modus offen ist - das Spiel ist dort ohnehin schon pausiert).
+        /// </summary>
+        public static bool BlockPauseInput;
+
         private void TriggerGameOver()
         {
             _isGameOver = true;
@@ -139,6 +145,7 @@ namespace RhythmWitchClone.UI.Pause
             if (AudioManager.Instance != null)
             {
                 AudioManager.Instance.PlayGameOverSound();
+                AudioManager.Instance.PlayGameOverMusic();
             }
         }
 

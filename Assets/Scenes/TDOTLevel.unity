@@ -565,6 +565,30 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5958998742893132549, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
+      propertyPath: syncToMusic
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5958998742893132549, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
+      propertyPath: beatsPerMinute
+      value: 99
+      objectReference: {fileID: 0}
+    - target: {fileID: 5958998742893132549, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
+      propertyPath: musicBeatOffset
+      value: 0.04
+      objectReference: {fileID: 0}
+    - target: {fileID: 6031556090057534336, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
+      propertyPath: orbScale
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6031556090057534336, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
+      propertyPath: manaOrbPrefab
+      value: 
+      objectReference: {fileID: 1079843845774114827, guid: 991f9d0fedf80fa468c86459a75b9a20, type: 3}
+    - target: {fileID: 6031556090057534336, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
+      propertyPath: healthOrbPrefab
+      value: 
+      objectReference: {fileID: 600373290168618898, guid: cddc550ff8cfaa3449a507f7b7044c08, type: 3}
     - target: {fileID: 8872681244663923598, guid: 6ba484ea7c911454ea0a2ee7122b7f51, type: 3}
       propertyPath: m_Name
       value: Player
@@ -2162,9 +2186,17 @@ MonoBehaviour:
   timeBetweenWaves: 3
   startKeyCount: 2
   wavesPerExtraKey: 2
+  laneSpeedIncreasePerWave: 0.06
+  maxLaneSpeedMultiplier: 2.2
+  speedUpMusicWithLane: 1
   pointsPerKill: 10
   extraKillPointsPerWave: 5
   waveClearBonus: 50
+  upgradeShopEnabled: 1
+  cardAbilities: {fileID: 0}
+  shopFont: {fileID: 0}
+  upgradeCostIncreasePerPurchase: 2
+  upgradeCostMultiplier: 1
   scoreText: {fileID: 629421994}
   waveText: {fileID: 119677669}
   waveAnnouncementText: {fileID: 0}
@@ -2416,7 +2448,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000022888, y: 403}
+  m_AnchoredPosition: {x: -0.000022888, y: 393}
   m_SizeDelta: {x: 350.97, y: 102.7456}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1536168267

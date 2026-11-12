@@ -69,6 +69,11 @@ namespace RhythmWitchClone.Gameplay
         // CardAbilityController - PlayerController kennt keine Karten-Zahlen, führt nur aus,
         // was ihm über die Methoden unten übergeben wird).
         private float _damageReductionPercent; // 0-1, von SetDamageReduction gesetzt
+
+        // Dauerhafte Verbesserungen für den aktuellen Lauf (z.B. Upgrade-Auswahl im Endlos-Modus)
+        private float _upgradeDamageMultiplier = 1f;
+        private float _upgradeDamageTakenMultiplier = 1f;
+        private float _upgradeMoveSpeedMultiplier = 1f;
         private int _auraDamageBonus;
         private float _auraRadiusBonus;
 
@@ -144,11 +149,15 @@ namespace RhythmWitchClone.Gameplay
         public int CoinCount => GameSession.CoinCount;
 
         [Header("Orbs (fallen selten von toten Gegnern)")]
-        [Tooltip("Bild des grünen Lebens-Orbs. Leer = einfacher grüner Kreis.")]
-        [SerializeField] private Texture2D healthOrbTexture;
-        [Tooltip("Bild des blauen Mana-Orbs. Leer = einfacher blauer Kreis.")]
-        [SerializeField] private Texture2D manaOrbTexture;
+        [Tooltip("Prefab des grünen Lebens-Orbs (z.B. mit SpriteRenderer + Animator). Braucht KEIN Billboard-Script - " +
+                 "wird beim Spawnen automatisch zur Kamera gedreht. Leer = einfacher grüner Kreis.")]
+        [SerializeField] private GameObject healthOrbPrefab;
+        [Tooltip("Prefab des blauen Mana-Orbs. Leer = einfacher blauer Kreis.")]
+        [SerializeField] private GameObject manaOrbPrefab;
+        [Tooltip("Größe des Ersatz-Kreises, falls kein Prefab eingetragen ist (Prefabs behalten ihre eigene Größe).")]
         [SerializeField] private float orbScale = 0.45f;
+        [Tooltip("Wie hoch die Mitte des Orbs über dem Boden schwebt.")]
+        [SerializeField] private float orbHoverHeight = 0.5f;
         [Tooltip("Chance pro besiegtem Gegner auf einen Lebens-Orb (0.06 = 6%).")]
         [Range(0f, 1f)][SerializeField] private float healthOrbDropChance = 0.06f;
         [Tooltip("Chance pro besiegtem Gegner auf einen Mana-Orb (0.06 = 6%).")]
@@ -320,6 +329,7 @@ namespace RhythmWitchClone.Gameplay
             {
                 amount = Mathf.RoundToInt(amount * (1f - _damageReductionPercent));
             }
+            amount = Mathf.RoundToInt(amount * _upgradeDamageTakenMultiplier);
 
             CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
 
@@ -380,7 +390,7 @@ namespace RhythmWitchClone.Gameplay
         {
             float effectiveRadius = auraRadius + _auraRadiusBonus;
             int effectiveBaseDamage = baseAuraDamage + _auraDamageBonus;
-            int damage = Mathf.Max(1, Mathf.RoundToInt(effectiveBaseDamage * Mathf.Clamp01(1f - hitRatio)));
+            int damage = Mathf.Max(1, Mathf.RoundToInt(effectiveBaseDamage * _upgradeDamageMultiplier * Mathf.Clamp01(1f - hitRatio)));
 
             EnemyController[] enemies = FindObjectsByType<EnemyController>(FindObjectsSortMode.None);
             foreach (EnemyController enemy in enemies)
@@ -741,30 +751,8 @@ namespace RhythmWitchClone.Gameplay
 
         private void SpawnPickup(Vector3 position, PickupType type)
         {
-            GameObject pickupObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            pickupObject.name = type.ToString();
-
-            Collider existingCollider = pickupObject.GetComponent<Collider>();
-            if (existingCollider != null) Destroy(existingCollider);
-
-            pickupObject.transform.position = position + Vector3.up * 1f; // startet leicht erhöht, fällt dann runter
-            pickupObject.transform.localScale = Vector3.one * (type == PickupType.Coin ? coinScale : orbScale);
-
-            BillboardSprite billboard = pickupObject.AddComponent<BillboardSprite>();
-            Texture2D texture = type == PickupType.Coin ? coinTexture : type == PickupType.HealthOrb ? healthOrbTexture : manaOrbTexture;
-            if (texture != null)
-            {
-                billboard.SetTexture(texture);
-            }
-            else if (type != PickupType.Coin)
-            {
-                // Kein Bild eingetragen: einfach grün/blau einfärben, damit man den Orb trotzdem erkennt.
-                Renderer pickupRenderer = pickupObject.GetComponent<Renderer>();
-                if (pickupRenderer != null)
-                {
-                    pickupRenderer.material.color = type == PickupType.HealthOrb ? new Color(0.45f, 0.9f, 0.35f) : new Color(0.35f, 0.6f, 1f);
-                }
-            }
+            GameObject orbPrefab = type == PickupType.HealthOrb ? healthOrbPrefab : type == PickupType.ManaOrb ? manaOrbPrefab : null;
+            GameObject pickupObject = orbPrefab != null ? SpawnOrbFromPrefab(orbPrefab, position) : CreatePickupQuad(position, type);
 
             _activeCoins.Add(new Coin
             {
@@ -776,26 +764,102 @@ namespace RhythmWitchClone.Gameplay
             });
         }
 
-        private void CollectPickup(Coin pickup)
+        /// <summary>
+        /// Orb aus dem eigenen Prefab (mit Animation). Wird einmal zur Kamera gedreht - die Kamera
+        /// dreht sich in diesem Spiel nie, daher braucht es kein Billboard-Script. Collider im Prefab
+        /// werden entfernt, damit der Orb den Spieler nicht blockiert.
+        /// </summary>
+        private GameObject SpawnOrbFromPrefab(GameObject prefab, Vector3 position)
         {
+            Quaternion rotation = Camera.main != null ? Camera.main.transform.rotation : prefab.transform.rotation;
+            GameObject orb = Instantiate(prefab, position + Vector3.up * 1f, rotation);
+
+            foreach (Collider orbCollider in orb.GetComponentsInChildren<Collider>())
+            {
+                Destroy(orbCollider);
+            }
+            foreach (Rigidbody orbBody in orb.GetComponentsInChildren<Rigidbody>())
+            {
+                orbBody.isKinematic = true;
+            }
+
+            return orb;
+        }
+
+        /// <summary>Münze (bzw. Orb ohne Prefab): einfaches Quad mit BillboardSprite.</summary>
+        private GameObject CreatePickupQuad(Vector3 position, PickupType type)
+        {
+            GameObject pickupObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            pickupObject.name = type.ToString();
+
+            Collider existingCollider = pickupObject.GetComponent<Collider>();
+            if (existingCollider != null) Destroy(existingCollider);
+
+            pickupObject.transform.position = position + Vector3.up * 1f; // startet leicht erhöht, fällt dann runter
+            pickupObject.transform.localScale = Vector3.one * (type == PickupType.Coin ? coinScale : orbScale);
+
+            BillboardSprite billboard = pickupObject.AddComponent<BillboardSprite>();
+            if (type == PickupType.Coin)
+            {
+                if (coinTexture != null) billboard.SetTexture(coinTexture);
+            }
+            else
+            {
+                // Kein Orb-Prefab eingetragen: einfach grün/blau einfärben, damit man den Orb trotzdem erkennt.
+                Renderer pickupRenderer = pickupObject.GetComponent<Renderer>();
+                if (pickupRenderer != null)
+                {
+                    pickupRenderer.material.color = type == PickupType.HealthOrb ? new Color(0.45f, 0.9f, 0.35f) : new Color(0.35f, 0.6f, 1f);
+                }
+            }
+
+            return pickupObject;
+        }
+
+        /// <summary>
+        /// Sammelt sofort alle herumliegenden Münzen und Orbs ein (z.B. am Ende einer Welle,
+        /// bevor die Upgrade-Auswahl öffnet). Spielt pro Art nur einen Sound, damit es nicht dröhnt.
+        /// </summary>
+        public void CollectAllPickups()
+        {
+            bool coinSound = false, healthSound = false, manaSound = false;
+            for (int i = _activeCoins.Count - 1; i >= 0; i--)
+            {
+                Coin pickup = _activeCoins[i];
+                if (pickup.Transform == null) { _activeCoins.RemoveAt(i); continue; }
+
+                bool playSound = pickup.Type == PickupType.Coin ? !coinSound : pickup.Type == PickupType.HealthOrb ? !healthSound : !manaSound;
+                CollectPickup(pickup, playSound);
+                if (pickup.Type == PickupType.Coin) coinSound = true;
+                else if (pickup.Type == PickupType.HealthOrb) healthSound = true;
+                else manaSound = true;
+
+                Destroy(pickup.Transform.gameObject);
+                _activeCoins.RemoveAt(i);
+            }
+        }
+
+        private void CollectPickup(Coin pickup, bool playSound = true)
+        {
+            Vector3 pickupPosition = pickup.Transform.position;
+            AudioManager audio = playSound ? AudioManager.Instance : null;
+
             switch (pickup.Type)
             {
                 case PickupType.HealthOrb:
                     Heal(healthOrbAmount);
+                    if (audio != null) audio.PlayHealthOrbPickupSound(pickupPosition);
                     break;
                 case PickupType.ManaOrb:
                     if (cardAbilities == null) cardAbilities = FindFirstObjectByType<CardAbilityController>();
                     if (cardAbilities != null) cardAbilities.AddMana(manaOrbAmount);
+                    if (audio != null) audio.PlayManaOrbPickupSound(pickupPosition);
                     break;
                 default:
                     GameSession.AddCoins(1);
                     UpdateCoinUI();
+                    if (audio != null) audio.PlayCoinPickupSound(pickupPosition);
                     break;
-            }
-
-            if (AudioManager.Instance != null)
-            {
-                AudioManager.Instance.PlayCoinPickupSound(pickup.Transform.position);
             }
         }
 
@@ -828,7 +892,7 @@ namespace RhythmWitchClone.Gameplay
                 {
                     coin.BobTimer += Time.deltaTime;
                     Vector3 bobPosition = coin.Transform.position;
-                    bobPosition.y = coinGroundHeight + 0.15f + Mathf.Sin(coin.BobTimer * 3f) * 0.12f;
+                    bobPosition.y = coinGroundHeight + orbHoverHeight + Mathf.Sin(coin.BobTimer * 3f) * 0.12f;
                     coin.Transform.position = bobPosition;
                 }
 
@@ -854,6 +918,43 @@ namespace RhythmWitchClone.Gameplay
                 }
             }
         }
+
+        // ------------------------------------------------------------------
+        // Upgrades für den aktuellen Lauf (werden z.B. vom Endlos-Modus nach jeder Welle gekauft).
+        // Gelten nur bis die Szene neu geladen wird.
+        // ------------------------------------------------------------------
+
+        /// <summary>+X % Schaden für alle Noten-Wellen (0.1 = +10 %).</summary>
+        public void AddDamageBonusPercent(float percent) => _upgradeDamageMultiplier += percent;
+
+        /// <summary>X % weniger erlittener Schaden (0.1 = 10 % weniger), mehrfach stapelbar, maximal 70 % insgesamt.</summary>
+        public void AddDamageResistancePercent(float percent)
+        {
+            _upgradeDamageTakenMultiplier = Mathf.Max(0.3f, _upgradeDamageTakenMultiplier * (1f - percent));
+        }
+
+        /// <summary>Erhöht die maximalen HP und heilt sofort um denselben Betrag.</summary>
+        public void AddMaxHealth(int amount)
+        {
+            maxHealth += amount;
+            CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
+        }
+
+        /// <summary>Größere Noten-Welle (Welt-Einheiten).</summary>
+        public void AddAuraRadius(float amount) => auraRadius += amount;
+
+        /// <summary>+X % Lauftempo (0.08 = +8 %).</summary>
+        public void AddMoveSpeedPercent(float percent) => _upgradeMoveSpeedMultiplier += percent;
+
+        /// <summary>Erhöht die Chance auf Lebens- und Mana-Orbs (0.02 = +2 Prozentpunkte je Orb).</summary>
+        public void AddOrbDropChance(float amount)
+        {
+            healthOrbDropChance = Mathf.Clamp01(healthOrbDropChance + amount);
+            manaOrbDropChance = Mathf.Clamp01(manaOrbDropChance + amount);
+        }
+
+        /// <summary>Münzanzeige neu zeichnen (z.B. nachdem Münzen ausgegeben wurden).</summary>
+        public void RefreshCoinUI() => UpdateCoinUI();
 
         private void UpdateCoinUI()
         {
@@ -953,7 +1054,7 @@ namespace RhythmWitchClone.Gameplay
             _velocity.y += gravity * Time.deltaTime;
 
             float groundSpeedMultiplier = LevelManager.Instance != null ? LevelManager.Instance.GetSpeedMultiplierAt(transform.position) : 1f; // z.B. Büsche bremsen
-            Vector3 motion = moveDirection * moveSpeed * groundSpeedMultiplier + Vector3.up * _velocity.y;
+            Vector3 motion = moveDirection * moveSpeed * _upgradeMoveSpeedMultiplier * groundSpeedMultiplier + Vector3.up * _velocity.y;
             _controller.Move(motion * Time.deltaTime);
         }
 

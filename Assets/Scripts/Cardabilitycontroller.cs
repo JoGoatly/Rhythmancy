@@ -119,6 +119,27 @@ namespace RhythmWitchClone.Gameplay
         /// zusammen - änderst du z.B. Defense Damage Reduction, passt sich der Kartentext beim
         /// nächsten Start automatisch mit an.
         /// </summary>
+        // ------------------------------------------------------------------
+        // Karten-Upgrades für den aktuellen Lauf (z.B. Upgrade-Auswahl im Endlos-Modus).
+        // Kartentexte werden danach neu erzeugt, eine gerade aktive Karte bekommt die neuen Werte sofort.
+        // ------------------------------------------------------------------
+
+        public void AddDefenseHealAmount(int amount) { defenseHealAmount += amount; OnCardValuesChanged(); }
+        public void AddDefenseReduction(float amount) { defenseDamageReduction = Mathf.Min(0.8f, defenseDamageReduction + amount); OnCardValuesChanged(); }
+        public void AddAttackDamage(int amount) { attackDamageBonus += amount; OnCardValuesChanged(); }
+        public void AddAttackRadius(float amount) { attackRadiusBonus += amount; OnCardValuesChanged(); }
+        public void AddSpecialStunDuration(float seconds) { specialStunDuration += seconds; OnCardValuesChanged(); }
+        public void AddSpecialRadius(float amount) { specialShockwaveRadius += amount; OnCardValuesChanged(); }
+        public void AddManaRegenPercent(float percent) { manaRegenPerSecond *= 1f + percent; }
+
+        private void OnCardValuesChanged()
+        {
+            GenerateCardTexts();
+            if (player == null) return;
+            if (_activeCardIndex == 0) player.SetDamageReduction(defenseDamageReduction);
+            else if (_activeCardIndex == 1) player.SetAuraBonus(attackDamageBonus, attackRadiusBonus);
+        }
+
         private void GenerateCardTexts()
         {
             if (defCardText != null)

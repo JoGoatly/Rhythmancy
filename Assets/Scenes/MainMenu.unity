@@ -952,9 +952,18 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6487f3127f269c24fad6ee115d2e61b1, type: 3}
   - {fileID: 8300000, guid: dfe866915595bf646a7f40f15b4c8564, type: 3}
   mainMenuSceneName: MainMenu
+  sceneMusic:
+  - sceneName: TDOTLevel
+    music: {fileID: 8300000, guid: bbb18b6bc66738e47ac0458c909948bc, type: 3}
+  gameOverMusic: {fileID: 8300000, guid: 27318268ece2bcd45838ad60194a8a8f, type: 3}
+  tutorialSceneName: Tutorial
+  tutorialIntroMusic: {fileID: 8300000, guid: 27318268ece2bcd45838ad60194a8a8f, type: 3}
+  tutorialMusic: {fileID: 0}
   musicVolume: 1
   sfxVolume: 1
   coinPickupSfx: {fileID: 8300000, guid: aa97f8c6d187fe44fafbea750d8fa360, type: 3}
+  healthOrbPickupSfx: {fileID: 8300000, guid: a676bd2933f9f7e4aad7c25fb4549da4, type: 3}
+  manaOrbPickupSfx: {fileID: 8300000, guid: dc3d058196772264199c20f0ee854bb9, type: 3}
   projectileFiredSfx: {fileID: 8300000, guid: 72e6919ba7ba0784b9fb21aade59134a, type: 3}
   playerDamagedSfx: {fileID: 8300000, guid: 2aab01a24bc719c4ab72c8e79ef9f2e5, type: 3}
   enemyDamagedSfx: {fileID: 8300000, guid: 6b2f07e6c369ba5469f9d152443f8448, type: 3}
