@@ -433,6 +433,7 @@
 "Assets/Scripts/Core/GameSession.cs"
 "Assets/Scripts/Core/GameSettings.cs"
 "Assets/Scripts/Core/GameSettingsObject.cs"
+"Assets/Scripts/Endlessmodecontroller.cs"
 "Assets/Scripts/EnemyController.cs"
 "Assets/Scripts/Gameplay/Beatlanecontroller.cs"
 "Assets/Scripts/Gameplay/BillboardSprite.cs"

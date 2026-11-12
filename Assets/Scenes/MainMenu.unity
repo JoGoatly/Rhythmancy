@@ -2449,6 +2449,42 @@ MonoBehaviour:
       bushSpeedMultiplier: 0.5
       bushSlowAreaSize: 0.8
       brightnessRange: {x: 0.75, y: 1}
+  - sceneName: TDOTLevel
+    mapSettings:
+      autoDetectGround: 1
+      mapCenter: {x: 0, y: 0, z: 0}
+      mapSize: {x: 40, y: 40}
+      clearRadiusAroundPlayer: 4
+      enemyMinDistanceFromPlayer: 8
+      objectClearance: 1.5
+      addOuterWall: 1
+      bottomBoundaryOffset: 3
+      treeSprites:
+      - {fileID: 21300000, guid: 0b8a3df0d4837d146a4816cc5315aa3c, type: 3}
+      forestDepth: 6
+      treeSpacing: 1.5
+      treeRandomOffset: 0.8
+      forestEdgeWaviness: 0.6
+      forestEdgeNoiseScale: 0.12
+      forestEdgeDensity: 0.4
+      treeHeightRange: {x: 3, y: 6}
+      treeTrunkRadius: 0.4
+      treeColliderHeight: 3
+      rockSprites:
+      - {fileID: 21300000, guid: d679857323f065a4e81b35fd5bb0c05b, type: 3}
+      - {fileID: 21300000, guid: 0c2d5d76496dd36408964e32f9d5cd6f, type: 3}
+      - {fileID: 21300000, guid: bf740e2cd5c5ba84fa0d4f327a853bce, type: 3}
+      rockCount: 15
+      rockHeightRange: {x: 0.3, y: 1}
+      bushSprites:
+      - {fileID: 21300000, guid: 0eed40fe7f06a2f4e98149dd176d48f3, type: 3}
+      - {fileID: 21300000, guid: 532307e2e4cfd2741832df0ae96c06d7, type: 3}
+      - {fileID: 21300000, guid: ef4448a7a05983f4ca18093758288c0b, type: 3}
+      bushCount: 25
+      bushHeightRange: {x: 0.5, y: 1.6}
+      bushSpeedMultiplier: 0.5
+      bushSlowAreaSize: 0.8
+      brightnessRange: {x: 0.75, y: 1}
   propMaterial: {fileID: 0}
 --- !u!4 &867025686
 Transform:

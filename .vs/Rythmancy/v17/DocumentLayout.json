@@ -3,12 +3,36 @@
   "WorkspaceRootPath": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|c:\\users\\thinkpad\\documents\\github\\rythmancy\\assets\\scripts\\endlessmodecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\endlessmodecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|c:\\users\\thinkpad\\documents\\github\\rythmancy\\assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\level\\levelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\level\\levelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\ui\\pause\\pausemenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ui\\pause\\pausemenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\cardabilitycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\cardabilitycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\gameplay\\beatlanecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\beatlanecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\enemycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\enemycontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gameplay\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\tutorialmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\ui\\settings\\settingsstyle.uss||{3B902123-F8A7-4915-9F01-361F908088D0}",
@@ -27,20 +51,12 @@
       "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\core\\gamesession.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\level\\levelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\level\\levelmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\save\\savesystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\save\\savesystem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\ui\\mainmenu\\saveslotselectioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ui\\mainmenu\\saveslotselectioncontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\ui\\pause\\pausemenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\ui\\pause\\pausemenucontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{03C79147-6A46-C111-16C2-F78F09051A83}|Assembly-CSharp.csproj|C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\assets\\scripts\\ui\\settings\\audiosettingspanel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -62,37 +78,109 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "Endlessmodecontroller.cs",
+              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\EndlessmodeController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\EndlessmodeController.cs",
+              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\EndlessmodeController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\EndlessmodeController.cs",
+              "ViewState": "AgIAAEcCAAAAAAAAAAAIwGACAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-12T09:27:33.143Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Beatlanecontroller.cs",
+              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Gameplay\\Beatlanecontroller.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\Beatlanecontroller.cs",
+              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Gameplay\\Beatlanecontroller.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Gameplay\\Beatlanecontroller.cs",
+              "ViewState": "AgIAAPUBAAAAAAAAAAAIwA4CAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-12T09:18:08.461Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "EnemyController.cs",
+              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\EnemyController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\EnemyController.cs",
+              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\EnemyController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\EnemyController.cs",
+              "ViewState": "AgIAAEYCAAAAAAAAAAAIwF8CAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-03T11:43:31.552Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "PlayerController.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Gameplay\\PlayerController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Gameplay\\PlayerController.cs",
               "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Gameplay\\PlayerController.cs",
               "RelativeToolTip": "Assets\\Scripts\\Gameplay\\PlayerController.cs",
-              "ViewState": "AgIAALEDAAAAAAAAAAAAALEDAAABAAAAAAAAAA==",
+              "ViewState": "AgIAABEEAAAAAAAAAAAIwCEEAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T09:39:46.019Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-16T09:39:46.019Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 7,
               "Title": "Tutorialmanager.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Tutorialmanager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Tutorialmanager.cs",
               "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Tutorialmanager.cs",
               "RelativeToolTip": "Assets\\Scripts\\Tutorialmanager.cs",
-              "ViewState": "AgIAAJUCAAAAAAAAAAAUwLMCAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAO4CAAAAAAAAAAAAAAgDAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-16T09:38:28.049Z",
+              "WhenOpened": "2026-09-16T09:38:28.049Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "LevelManager.cs",
+              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Level\\LevelManager.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Level\\LevelManager.cs",
+              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Level\\LevelManager.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Level\\LevelManager.cs",
+              "ViewState": "AgIAACIDAAAAAAAAAAAIwDUDAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-14T14:53:45.881Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Cardabilitycontroller.cs",
+              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Cardabilitycontroller.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\Cardabilitycontroller.cs",
+              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Cardabilitycontroller.cs",
+              "RelativeToolTip": "Assets\\Scripts\\Cardabilitycontroller.cs",
+              "ViewState": "AgIAAEIBAAAAAAAAAAAIwFsBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-11-12T09:18:34.547Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "PauseMenuController.cs",
+              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
+              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
+              "ViewState": "AgIAAPQAAAAAAAAAAAAIwA0BAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-08-14T14:46:53.438Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
               "Title": "SettingsStyle.uss",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\UI\\Settings\\SettingsStyle.uss",
               "RelativeDocumentMoniker": "Assets\\UI\\Settings\\SettingsStyle.uss",
@@ -104,7 +192,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 9,
               "Title": "GameSettingsObject.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Core\\GameSettingsObject.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Core\\GameSettingsObject.cs",
@@ -116,31 +204,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "LevelManager.cs",
-              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Level\\LevelManager.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\Level\\LevelManager.cs",
-              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Level\\LevelManager.cs",
-              "RelativeToolTip": "Assets\\Scripts\\Level\\LevelManager.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAIwHkAAAB3AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-14T14:53:45.881Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "PauseMenuController.cs",
-              "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
-              "ToolTip": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
-              "RelativeToolTip": "Assets\\Scripts\\UI\\Pause\\PauseMenuController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-08-14T14:46:53.438Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 14,
               "Title": "AudioSettingsPanel.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\Settings\\AudioSettingsPanel.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\Settings\\AudioSettingsPanel.cs",
@@ -152,7 +216,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 16,
               "Title": "SettingsController.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\Settings\\SettingsController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\Settings\\SettingsController.cs",
@@ -164,7 +228,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 15,
               "Title": "AudioManager.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Audio\\AudioManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Audio\\AudioManager.cs",
@@ -176,7 +240,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 10,
               "Title": "GameSettings.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Core\\GameSettings.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Core\\GameSettings.cs",
@@ -188,7 +252,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 11,
               "Title": "GameSession.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Core\\GameSession.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Core\\GameSession.cs",
@@ -200,7 +264,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 13,
               "Title": "SaveSlotSelectionController.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\UI\\MainMenu\\SaveSlotSelectionController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UI\\MainMenu\\SaveSlotSelectionController.cs",
@@ -212,7 +276,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 12,
               "Title": "SaveSystem.cs",
               "DocumentMoniker": "C:\\Users\\ThinkPad\\Documents\\GitHub\\Rythmancy\\Assets\\Scripts\\Save\\SaveSystem.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Save\\SaveSystem.cs",

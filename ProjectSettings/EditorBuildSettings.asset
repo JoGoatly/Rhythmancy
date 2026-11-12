@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Gameasdad.unity
     guid: f81b2a45a2953504492f2a495cbb8d8e
+  - enabled: 1
+    path: Assets/Scenes/TDOTLevel.unity
+    guid: 791f16d390d46c54a8cb0477850917f1
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

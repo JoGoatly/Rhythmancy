@@ -97,6 +97,12 @@ namespace RhythmWitchClone.Gameplay
         private Vector2 _atkCardBasePos;
         private Vector2 _spcCardBasePos;
 
+        /// <summary>Füllt Mana auf (z.B. durch einen blauen Mana-Orb), maximal bis zum Maximum.</summary>
+        public void AddMana(float amount)
+        {
+            _currentMana = Mathf.Min(maxMana, _currentMana + amount);
+        }
+
         private void Start()
         {
             _currentMana = maxMana;

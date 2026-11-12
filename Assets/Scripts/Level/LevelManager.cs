@@ -170,6 +170,11 @@ namespace RhythmWitchClone.Levels
         private readonly List<float> _bushRadii = new List<float>();
         private float _bushSpeedMultiplier = 1f;
 
+        // Spielfeld der aktuellen Szene + alle erzeugten Collider (Baumstämme, unsichtbare Wände),
+        // damit z.B. der Endlos-Modus Gegner aus dem Wald kommen lassen kann.
+        private MapSettings _activeMap;
+        private readonly List<Collider> _generatedColliders = new List<Collider>();
+
         // Tatsächlich benutztes Spielfeld der aktuellen Szene (aus Map Settings oder automatisch vom Boden erkannt).
         private Vector3 _mapCenter;
         private Vector2 _mapSize;
@@ -298,6 +303,8 @@ namespace RhythmWitchClone.Levels
             _bushPositions.Clear();
             _bushRadii.Clear();
             _bushSpeedMultiplier = 1f;
+            _activeMap = null;
+            _generatedColliders.Clear();
 
             StartCoroutine(BuildSceneNextFrame(scene));
         }
@@ -368,6 +375,49 @@ namespace RhythmWitchClone.Levels
         /// Tempo-Faktor an einer Position: in einem Busch kleiner als 1 (bremst), sonst 1.
         /// Wird von PlayerController und EnemyController beim Bewegen abgefragt.
         /// </summary>
+        /// <summary>
+        /// Zufälliger Punkt mitten im Waldstreifen am Rand des aktuellen Spielfelds (z.B. damit
+        /// Gegner im Endlos-Modus aus dem Wald heraus kommen). False, wenn in dieser Szene
+        /// kein Wald erzeugt wurde.
+        /// </summary>
+        public bool TryGetForestSpawnPoint(out Vector3 point)
+        {
+            point = Vector3.zero;
+            if (_activeMap == null) return false;
+
+            float halfX = _mapSize.x * 0.5f;
+            float halfZ = _mapSize.y * 0.5f;
+            float minDepth = 1f;
+            float maxDepth = Mathf.Max(minDepth + 0.5f, _activeMap.forestDepth * 0.8f);
+
+            for (int attempt = 0; attempt < 40; attempt++)
+            {
+                float x = UnityEngine.Random.Range(-halfX + minDepth, halfX - minDepth);
+                float z = UnityEngine.Random.Range(-halfZ + minDepth, halfZ - minDepth);
+                float distanceToEdge = Mathf.Min(halfX - Mathf.Abs(x), halfZ - Mathf.Abs(z));
+
+                if (distanceToEdge >= minDepth && distanceToEdge <= maxDepth)
+                {
+                    point = _mapCenter + new Vector3(x, 0f, z);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Lässt einen Collider (z.B. den eines Gegners) durch alle erzeugten Baumstämme und
+        /// unsichtbaren Wände hindurchgehen - der Spieler wird davon weiterhin aufgehalten.
+        /// </summary>
+        public void IgnoreGeneratedColliders(Collider other)
+        {
+            if (other == null) return;
+            foreach (Collider generated in _generatedColliders)
+            {
+                if (generated != null) Physics.IgnoreCollision(other, generated, true);
+            }
+        }
+
         public float GetSpeedMultiplierAt(Vector3 worldPosition)
         {
             for (int i = 0; i < _bushPositions.Count; i++)
@@ -425,6 +475,7 @@ namespace RhythmWitchClone.Levels
             // Sicherstellen, dass alle Collider der frisch geladenen Szene für die Abstandsprüfung bekannt sind.
             Physics.SyncTransforms();
             PrepareMapArea(map, playerPosition, displayName);
+            _activeMap = map;
 
             Quaternion cameraRotation = Camera.main != null ? Camera.main.transform.rotation : Quaternion.identity;
 
@@ -484,6 +535,7 @@ namespace RhythmWitchClone.Levels
                         collider.height = Mathf.Max(map.treeColliderHeight, collider.radius * 2f);
                         collider.center = new Vector3(0f, collider.height * 0.5f, 0f);
                         tree.isStatic = true;
+                        _generatedColliders.Add(collider);
                     }
                 }
             }
@@ -726,6 +778,7 @@ namespace RhythmWitchClone.Levels
             BoxCollider box = wall.AddComponent<BoxCollider>();
             box.size = size;
             wall.isStatic = true;
+            _generatedColliders.Add(box);
         }
 
         /// <summary>

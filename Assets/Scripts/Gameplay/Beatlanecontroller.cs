@@ -176,6 +176,27 @@ namespace RhythmWitchClone.Gameplay
         /// Blendet die Spur (Noten + Ziel-Linie) komplett ein/aus und pausiert die komplette
         /// Logik dieses Skripts (z.B. während die Level-/Upgrade-Auswahl in der Safe Zone offen ist).
         /// </summary>
+        // 0 = alle Tasten aus laneKeys; sonst nur die ersten N (z.B. Endlos-Modus: anfangs wenige Tasten).
+        private int _activeKeyCount;
+
+        /// <summary>Anzahl der aktuell benutzten Tasten (die ersten N aus der Lane-Keys-Liste).</summary>
+        public int ActiveKeyCount => _activeKeyCount > 0 ? Mathf.Min(_activeKeyCount, laneKeys.Count) : laneKeys.Count;
+        public int TotalKeyCount => laneKeys.Count;
+
+        /// <summary>
+        /// Begrenzt die zufällig vorkommenden Tasten auf die ersten "count" Einträge der Lane-Keys-Liste
+        /// (Reihenfolge im Inspector = Reihenfolge, in der neue Tasten dazukommen). 0 = alle.
+        /// Noten mit einer Taste, die gerade nicht mehr erlaubt ist, bekommen sofort eine neue.
+        /// </summary>
+        public void SetActiveKeyCount(int count)
+        {
+            _activeKeyCount = Mathf.Max(0, count);
+            foreach (LaneNote note in _notes)
+            {
+                if (note.KeyIndex >= ActiveKeyCount) AssignRandomKey(note);
+            }
+        }
+
         public void SetActive(bool isActive)
         {
             enabled = isActive;
@@ -224,7 +245,7 @@ namespace RhythmWitchClone.Gameplay
 
             for (int i = 0; i < count; i++)
             {
-                int keyIndex = Random.Range(0, laneKeys.Count); // welche Taste zuerst kommt, ist zufällig
+                int keyIndex = Random.Range(0, ActiveKeyCount); // welche Taste zuerst kommt, ist zufällig
 
                 GameObject noteObject = new GameObject($"Note_{i}", typeof(RectTransform), typeof(Image));
                 noteObject.transform.SetParent(laneContainer, worldPositionStays: false);
@@ -296,7 +317,7 @@ namespace RhythmWitchClone.Gameplay
         {
             if (laneKeys.Count == 0) return;
 
-            int newKeyIndex = Random.Range(0, laneKeys.Count);
+            int newKeyIndex = Random.Range(0, ActiveKeyCount);
             note.KeyIndex = newKeyIndex;
 
             if (note.IconImage != null)

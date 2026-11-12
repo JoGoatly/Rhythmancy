@@ -5872,7 +5872,6 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6355710938594555142}
   - {fileID: 3360359361018360326}
   - {fileID: 1691086223252143362}
   - {fileID: 8783317217231097955}
@@ -5888,6 +5887,7 @@ RectTransform:
   - {fileID: 642210042842750012}
   - {fileID: 5171547909398312783}
   - {fileID: 8151367326500688920}
+  - {fileID: 6355710938594555142}
   - {fileID: 6310804446792721420}
   m_Father: {fileID: 4329379451140365581}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11602,10 +11602,18 @@ MonoBehaviour:
   coinMoveSpeed: 4
   coinCollectDistance: 0.5
   coinCountText: {fileID: 2495710158314017366}
+  healthOrbTexture: {fileID: 0}
+  manaOrbTexture: {fileID: 0}
+  orbScale: 0.45
+  healthOrbDropChance: 0.06
+  manaOrbDropChance: 0.06
+  healthOrbAmount: 25
+  manaOrbAmount: 25
+  cardAbilities: {fileID: 0}
   winPanel: {fileID: 6949512194938432784}
   winText: {fileID: 3512885361141982775}
   backToMenuButton: {fileID: 7844277157970180322}
-  safeZoneSceneName: SafeZone
+  safeZoneSceneName: TDOTLevel
   winCheckDelay: 1
 --- !u!114 &5958998742893132549
 MonoBehaviour:

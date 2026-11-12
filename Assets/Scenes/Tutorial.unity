@@ -1673,12 +1673,14 @@ MonoBehaviour:
       Man nannte sie Harmonia."
     images:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: "Wer den Rhythmus der Welt h\xF6ren konnte, konnte ihn auch lenken. Diese
       Menschen nannte man Rhythmanten. Mit jedem Ton, den sie perfekt im Takt spielten,
       formten sie Magie."
     images:
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: Im Herzen von Harmonia stand der Ewige Taktgeber. Er gab der ganzen Welt
       ihren Rhythmus vor, Tag und Nacht, seit Anbeginn der Zeit.
     images:
@@ -1686,6 +1688,7 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: "Doch eines Nachts verstummte er. Ein schriller, falscher Ton zerriss die
       Stille, und der Taktgeber zerbrach in unz\xE4hlige Splitter."
     images:
@@ -1693,6 +1696,7 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: "Seitdem liegt die Dissonanz \xFCber dem Land. Die Gesch\xF6pfe, die sie
       ber\xFChrt, verlieren ihren Takt und werden wild und feindselig. W\xE4lder,
       W\xFCsten und St\xE4dte versinken nach und nach im Chaos."
@@ -1701,6 +1705,7 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: "Die meisten Rhythmanten sind verschwunden. Doch in einer kleinen Stube
       sa\xDF ein junger Komponist, der den alten Takt noch immer h\xF6ren konnte,
       leise, aber deutlich. Du."
@@ -1709,6 +1714,7 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: "In derselben Nacht landete ein Splitter des Taktgebers vor deinen F\xFC\xDFen.
       Als du ihn ber\xFChrt hast, durchstr\xF6mte dich die Musik der alten Welt.
       Der Splitter hatte dich gew\xE4hlt."
@@ -1717,6 +1723,7 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: Aber Musik allein besiegt die Dissonanz nicht. Bevor du dich hinauswagst,
       musst du lernen, deinen Takt zu halten, deine Kraft zu lenken und dich zu verteidigen.
     images:
@@ -1724,6 +1731,7 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   - text: "Hier, auf diesem alten \xDCbungsplatz der Rhythmanten, beginnt deine Reise.
       Finde die Splitter, stelle den Ewigen Taktgeber wieder her und bring Harmonia
       seinen Rhythmus zur\xFCck."
@@ -1732,11 +1740,13 @@ MonoBehaviour:
     - {fileID: 272584051, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 831436490, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
     - {fileID: 56165584, guid: a48f6e74edc4fd649bbf6e5f5a507903, type: 3}
+    voiceClip: {fileID: 0}
   introPanel: {fileID: 1210769642}
   introImageContainer: {fileID: 2002889023}
   introText: {fileID: 1048791286}
   introContinuePrompt: {fileID: 1303252693}
   introImageFadeDuration: 0.5
+  introVoiceVolume: 1
   steps:
   - text: Willkommen in Rhythmancy
     advanceMode: 0
@@ -9115,10 +9125,18 @@ MonoBehaviour:
   coinMoveSpeed: 4
   coinCollectDistance: 0.5
   coinCountText: {fileID: 2495710158202475957}
+  healthOrbTexture: {fileID: 0}
+  manaOrbTexture: {fileID: 0}
+  orbScale: 0.45
+  healthOrbDropChance: 0.06
+  manaOrbDropChance: 0.06
+  healthOrbAmount: 25
+  manaOrbAmount: 25
+  cardAbilities: {fileID: 0}
   winPanel: {fileID: 6949512194792286963}
   winText: {fileID: 3512885361264271828}
   backToMenuButton: {fileID: 7844277158127075073}
-  safeZoneSceneName: SafeZone
+  safeZoneSceneName: TDOTLevel
   winCheckDelay: 1
 --- !u!1 &6052643604793514571
 GameObject:

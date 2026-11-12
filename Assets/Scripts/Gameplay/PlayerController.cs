@@ -143,11 +143,30 @@ namespace RhythmWitchClone.Gameplay
         // Szenenwechsel übersteht, ohne dass der ganze Spieler persistent gemacht werden muss.
         public int CoinCount => GameSession.CoinCount;
 
+        [Header("Orbs (fallen selten von toten Gegnern)")]
+        [Tooltip("Bild des grünen Lebens-Orbs. Leer = einfacher grüner Kreis.")]
+        [SerializeField] private Texture2D healthOrbTexture;
+        [Tooltip("Bild des blauen Mana-Orbs. Leer = einfacher blauer Kreis.")]
+        [SerializeField] private Texture2D manaOrbTexture;
+        [SerializeField] private float orbScale = 0.45f;
+        [Tooltip("Chance pro besiegtem Gegner auf einen Lebens-Orb (0.06 = 6%).")]
+        [Range(0f, 1f)][SerializeField] private float healthOrbDropChance = 0.06f;
+        [Tooltip("Chance pro besiegtem Gegner auf einen Mana-Orb (0.06 = 6%).")]
+        [Range(0f, 1f)][SerializeField] private float manaOrbDropChance = 0.06f;
+        [SerializeField] private int healthOrbAmount = 25;
+        [SerializeField] private float manaOrbAmount = 25f;
+        [Tooltip("Wird für die Mana-Orbs gebraucht. Leer = wird automatisch in der Szene gesucht.")]
+        [SerializeField] private CardAbilityController cardAbilities;
+
+        private enum PickupType { Coin, HealthOrb, ManaOrb }
+
         private class Coin
         {
             public Transform Transform;
             public bool HasLanded;
             public float FallVelocityY;
+            public PickupType Type;
+            public float BobTimer;
         }
 
         private readonly List<Coin> _activeCoins = new List<Coin>();
@@ -395,6 +414,14 @@ namespace RhythmWitchClone.Gameplay
         /// Heilt den Spieler um den angegebenen Betrag (bis maximal Max Health). Public, damit
         /// z.B. CardAbilityController das periodisch für die Verteidigungskarte aufrufen kann.
         /// </summary>
+        /// <summary>Setzt den Spieler direkt an eine Position (z.B. Startpunkt im Endlos-Modus).</summary>
+        public void TeleportTo(Vector3 position)
+        {
+            _controller.enabled = false;
+            transform.position = position;
+            _controller.enabled = true;
+        }
+
         public void Heal(int amount)
         {
             CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
@@ -699,27 +726,77 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         public void SpawnCoin(Vector3 position)
         {
-            GameObject coinObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            coinObject.name = "Coin";
+            SpawnPickup(position, PickupType.Coin);
+        }
 
-            Collider existingCollider = coinObject.GetComponent<Collider>();
+        /// <summary>
+        /// Würfelt (unabhängig voneinander) aus, ob ein grüner Lebens-Orb und/oder ein blauer
+        /// Mana-Orb fällt. Wird von EnemyController beim Tod aufgerufen.
+        /// </summary>
+        public void TrySpawnOrbs(Vector3 position)
+        {
+            if (Random.value < healthOrbDropChance) SpawnPickup(position + new Vector3(0.4f, 0f, 0f), PickupType.HealthOrb);
+            if (Random.value < manaOrbDropChance) SpawnPickup(position + new Vector3(-0.4f, 0f, 0f), PickupType.ManaOrb);
+        }
+
+        private void SpawnPickup(Vector3 position, PickupType type)
+        {
+            GameObject pickupObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            pickupObject.name = type.ToString();
+
+            Collider existingCollider = pickupObject.GetComponent<Collider>();
             if (existingCollider != null) Destroy(existingCollider);
 
-            coinObject.transform.position = position + Vector3.up * 1f; // startet leicht erhöht, fällt dann runter
-            coinObject.transform.localScale = Vector3.one * coinScale;
+            pickupObject.transform.position = position + Vector3.up * 1f; // startet leicht erhöht, fällt dann runter
+            pickupObject.transform.localScale = Vector3.one * (type == PickupType.Coin ? coinScale : orbScale);
 
-            BillboardSprite billboard = coinObject.AddComponent<BillboardSprite>();
-            if (coinTexture != null)
+            BillboardSprite billboard = pickupObject.AddComponent<BillboardSprite>();
+            Texture2D texture = type == PickupType.Coin ? coinTexture : type == PickupType.HealthOrb ? healthOrbTexture : manaOrbTexture;
+            if (texture != null)
             {
-                billboard.SetTexture(coinTexture);
+                billboard.SetTexture(texture);
+            }
+            else if (type != PickupType.Coin)
+            {
+                // Kein Bild eingetragen: einfach grün/blau einfärben, damit man den Orb trotzdem erkennt.
+                Renderer pickupRenderer = pickupObject.GetComponent<Renderer>();
+                if (pickupRenderer != null)
+                {
+                    pickupRenderer.material.color = type == PickupType.HealthOrb ? new Color(0.45f, 0.9f, 0.35f) : new Color(0.35f, 0.6f, 1f);
+                }
             }
 
             _activeCoins.Add(new Coin
             {
-                Transform = coinObject.transform,
+                Transform = pickupObject.transform,
                 HasLanded = false,
-                FallVelocityY = 0f
+                FallVelocityY = 0f,
+                Type = type,
+                BobTimer = Random.value * 10f
             });
+        }
+
+        private void CollectPickup(Coin pickup)
+        {
+            switch (pickup.Type)
+            {
+                case PickupType.HealthOrb:
+                    Heal(healthOrbAmount);
+                    break;
+                case PickupType.ManaOrb:
+                    if (cardAbilities == null) cardAbilities = FindFirstObjectByType<CardAbilityController>();
+                    if (cardAbilities != null) cardAbilities.AddMana(manaOrbAmount);
+                    break;
+                default:
+                    GameSession.AddCoins(1);
+                    UpdateCoinUI();
+                    break;
+            }
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayCoinPickupSound(pickup.Transform.position);
+            }
         }
 
         private void UpdateCoins()
@@ -746,18 +823,22 @@ namespace RhythmWitchClone.Gameplay
                     continue;
                 }
 
-                float distance = Vector3.Distance(coin.Transform.position, transform.position);
+                // Orbs schweben sanft auf und ab, damit sie auffallen.
+                if (coin.Type != PickupType.Coin)
+                {
+                    coin.BobTimer += Time.deltaTime;
+                    Vector3 bobPosition = coin.Transform.position;
+                    bobPosition.y = coinGroundHeight + 0.15f + Mathf.Sin(coin.BobTimer * 3f) * 0.12f;
+                    coin.Transform.position = bobPosition;
+                }
+
+                Vector3 flatOffset = coin.Transform.position - transform.position;
+                flatOffset.y = 0f;
+                float distance = flatOffset.magnitude;
 
                 if (distance <= coinCollectDistance)
                 {
-                    GameSession.AddCoins(1);
-                    UpdateCoinUI();
-
-                    if (AudioManager.Instance != null)
-                    {
-                        AudioManager.Instance.PlayCoinPickupSound(coin.Transform.position);
-                    }
-
+                    CollectPickup(coin);
                     Destroy(coin.Transform.gameObject);
                     _activeCoins.RemoveAt(i);
                     continue;

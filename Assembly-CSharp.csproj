@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\Core\GameSession.cs" />
     <Compile Include="Assets\Scripts\UpgradeController.cs" />
     <Compile Include="Assets\Scripts\Level\LevelManager.cs" />
+    <Compile Include="Assets\Scripts\Endlessmodecontroller.cs" />
     <Compile Include="Assets\Scripts\Gameplay\BillboardSprite.cs" />
     <Compile Include="Assets\Scripts\Tutorialmanager.cs" />
     <Compile Include="Assets\Scripts\Gameplay\CameraFollow.cs" />

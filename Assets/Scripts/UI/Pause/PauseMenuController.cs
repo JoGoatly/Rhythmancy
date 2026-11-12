@@ -123,12 +123,18 @@ namespace RhythmWitchClone.UI.Pause
             }
         }
 
+        /// <summary>
+        /// True = beim Tod NICHT das normale Game-Over-Panel zeigen, weil die Szene einen eigenen
+        /// Bildschirm hat (Endlos-Modus: Highscore + Namenseingabe). Wird vom EndlessModeController gesetzt.
+        /// </summary>
+        public static bool UseCustomGameOverScreen;
+
         private void TriggerGameOver()
         {
             _isGameOver = true;
             Time.timeScale = 0f;
             pauseRootPanel.SetActive(false); // falls Pause gerade offen war, schließen
-            if (gameOverPanel != null) gameOverPanel.SetActive(true);
+            if (gameOverPanel != null && !UseCustomGameOverScreen) gameOverPanel.SetActive(true);
 
             if (AudioManager.Instance != null)
             {

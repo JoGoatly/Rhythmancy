@@ -133,6 +133,21 @@ namespace RhythmWitchClone.Gameplay
         /// <summary>True, sobald der Gegner besiegt ist und nur noch seine Todes-Animation läuft.</summary>
         public bool IsDying => _isDying;
 
+        public int MaxHealth => maxHealth;
+
+        /// <summary>Wird ausgelöst, sobald irgendein Gegner besiegt wurde (z.B. für Punkte im Endlos-Modus).</summary>
+        public static event System.Action<EnemyController> Killed;
+
+        /// <summary>
+        /// Multipliziert die Lebenspunkte dieses Gegners (z.B. 1.5 = 50% mehr). Direkt nach
+        /// Instantiate aufrufen - wird vom Endlos-Modus für immer stärkere Wellen benutzt.
+        /// </summary>
+        public void SetHealthMultiplier(float multiplier)
+        {
+            maxHealth = Mathf.Max(1, Mathf.RoundToInt(maxHealth * multiplier));
+            _currentHealth = maxHealth;
+        }
+
         private void Awake()
         {
             _controller = GetComponent<CharacterController>();
@@ -330,7 +345,10 @@ namespace RhythmWitchClone.Gameplay
             if (_player != null)
             {
                 _player.SpawnCoin(transform.position);
+                _player.TrySpawnOrbs(transform.position); // seltene Lebens-/Mana-Orbs
             }
+
+            Killed?.Invoke(this);
         }
 
         private void UpdateDeathAnimation()
