@@ -71,6 +71,9 @@ namespace RhythmWitchClone.Levels
         [SerializeField] private Button coinMagnetBuyButton;
         [SerializeField] private int coinMagnetMaxLevel = 10;
 
+        [SerializeField] private Sprite shopFrame;
+        [SerializeField] private Sprite shopButton;
+        private TMP_Text balanceLabel;
         private bool _playerInRange;
 
         private void Awake()
@@ -85,16 +88,87 @@ namespace RhythmWitchClone.Levels
 
         private void Start()
         {
+            BuildShopUI();
             if (keyPromptUI != null) keyPromptUI.SetActive(false);
             if (upgradePanel != null) upgradePanel.SetActive(false);
         }
 
+        private static RectTransform ShopRect(string name, Transform parent, Vector2 min, Vector2 max)
+        {
+            var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
+            rect.SetParent(parent, false);
+            rect.anchorMin = min; rect.anchorMax = max;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            return rect;
+        }
+
+        private TMP_Text ShopLabel(string name, Transform parent, Vector2 min, Vector2 max, float size)
+        {
+            var label = ShopRect(name, parent, min, max).gameObject.AddComponent<TextMeshProUGUI>();
+            label.font = TMP_Settings.defaultFontAsset;
+            label.fontSize = size;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 14; label.fontSizeMax = size;
+            label.color = new Color(.22f, .16f, .10f);
+            label.alignment = TextAlignmentOptions.Center;
+            label.raycastTarget = false;
+            return label;
+        }
+
+        private void BuildShopUI()
+        {
+            if (upgradePanel == null || shopFrame == null) return;
+            foreach (Transform child in upgradePanel.transform) child.gameObject.SetActive(false);
+            var panel = (RectTransform)upgradePanel.transform;
+            panel.anchorMin = Vector2.zero; panel.anchorMax = Vector2.one;
+            panel.offsetMin = panel.offsetMax = Vector2.zero;
+            var shade = upgradePanel.GetComponent<Image>();
+            if (shade != null) { shade.sprite = null; shade.color = new Color(0, 0, 0, .72f); }
+            var frame = ShopRect("Shop parchment", panel, new Vector2(.10f, .10f), new Vector2(.90f, .90f));
+            var paper = frame.gameObject.AddComponent<Image>();
+            paper.sprite = shopFrame; paper.color = new Color(1f, .96f, .86f);
+            ShopLabel("Title", frame, new Vector2(.1f,.84f), new Vector2(.9f,.96f), 38).text = "Die Werkstatt";
+            balanceLabel = ShopLabel("Balance", frame, new Vector2(.1f,.75f), new Vector2(.9f,.84f), 24);
+            var buttons = new[] { ballCountBuyButton, projectileCountBuyButton, projectileDamageBuyButton, coinMagnetBuyButton };
+            var labels = new TMP_Text[4];
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                float top = .73f - i * .14f;
+                var row = ShopRect("Upgrade row " + i, frame, new Vector2(.12f, top-.125f), new Vector2(.88f, top));
+                row.gameObject.AddComponent<Image>().color = new Color(.48f,.35f,.19f,.09f);
+                labels[i] = ShopLabel("Upgrade", row, new Vector2(.025f,.08f), new Vector2(.64f,.92f), 24);
+                labels[i].alignment = TextAlignmentOptions.MidlineLeft;
+                StyleShopButton(buttons[i], row, new Vector2(.66f,.08f), new Vector2(.98f,.92f), "Kaufen");
+            }
+            ballCountLabel = labels[0]; projectileCountLabel = labels[1];
+            projectileDamageLabel = labels[2]; coinMagnetLabel = labels[3];
+            ShopLabel("Hint", frame, new Vector2(.1f,.115f), new Vector2(.9f,.17f), 18).text = "Verbesserungen gelten ab dem nächsten Level.";
+            StyleShopButton(closeButton, frame, new Vector2(.37f,.035f), new Vector2(.63f,.11f), "Schließen");
+        }
+
+        private void StyleShopButton(Button button, Transform parent, Vector2 min, Vector2 max, string title)
+        {
+            if (button == null) return;
+            button.transform.SetParent(parent, false);
+            button.gameObject.SetActive(true);
+            var rect = (RectTransform)button.transform;
+            rect.anchorMin = min; rect.anchorMax = max;
+            rect.offsetMin = rect.offsetMax = Vector2.zero;
+            rect.localScale = Vector3.one;
+            foreach (Transform child in rect) child.gameObject.SetActive(false);
+            var image = button.GetComponent<Image>();
+            if (image != null) { image.sprite = shopButton; image.color = Color.white; image.type = Image.Type.Simple; }
+            ShopLabel("Action", rect, new Vector2(.1f,.1f), new Vector2(.9f,.9f), 23).text = title;
+        }
+
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             if (!_playerInRange) return;
             if (upgradePanel != null && upgradePanel.activeSelf) return; // schon offen
 
-            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            Key key = RhythmancySettings.GetKeyForAction("Interaktion");
+            if (Keyboard.current != null && key != Key.None && Keyboard.current[key].wasPressedThisFrame)
             {
                 OpenUpgradePanel();
             }
@@ -105,7 +179,7 @@ namespace RhythmWitchClone.Levels
             if (!other.CompareTag("Player")) return;
 
             _playerInRange = true;
-            if (keyPromptUI != null) keyPromptUI.SetActive(true);
+            ShowInteractionPrompt();
         }
 
         private void OnTriggerExit(Collider other)
@@ -128,8 +202,16 @@ namespace RhythmWitchClone.Levels
         private void CloseUpgradePanel()
         {
             if (upgradePanel != null) upgradePanel.SetActive(false);
-            if (keyPromptUI != null && _playerInRange) keyPromptUI.SetActive(true);
+            if (_playerInRange) ShowInteractionPrompt();
             if (beatLane != null) beatLane.SetActive(true);
+        }
+
+        private void ShowInteractionPrompt()
+        {
+            if (keyPromptUI == null) return;
+            TMP_Text label = keyPromptUI.GetComponentInChildren<TMP_Text>(true);
+            if (label != null) label.text = $"[{RhythmancySettings.GetBinding("Interaktion")}]  UPGRADES";
+            keyPromptUI.SetActive(true);
         }
 
         private int GetLevel(string key) => GameSession.GetUpgradeLevel(key);
@@ -167,10 +249,23 @@ namespace RhythmWitchClone.Levels
 
         private void RefreshUpgradeUI()
         {
+            if (balanceLabel != null) balanceLabel.text = $"Dein Guthaben: {GameSession.CoinCount} Münzen";
+            SetPurchaseState(ballCountBuyButton, BallCountKey, ballCountMaxLevel);
+            SetPurchaseState(projectileCountBuyButton, ProjectileCountKey, projectileCountMaxLevel);
+            SetPurchaseState(projectileDamageBuyButton, ProjectileDamageKey, projectileDamageMaxLevel);
+            SetPurchaseState(coinMagnetBuyButton, CoinMagnetKey, coinMagnetMaxLevel);
             UpdateUpgradeLabel(ballCountLabel, "Tasten", BallCountKey, ballCountMaxLevel);
             UpdateUpgradeLabel(projectileCountLabel, "Projektile", ProjectileCountKey, projectileCountMaxLevel);
             UpdateUpgradeLabel(projectileDamageLabel, "Schaden", ProjectileDamageKey, projectileDamageMaxLevel);
             UpdateUpgradeLabel(coinMagnetLabel, "Münzmagnet", CoinMagnetKey, coinMagnetMaxLevel);
+        }
+
+        private void SetPurchaseState(Button button, string key, int maxLevel)
+        {
+            if (button == null) return;
+            button.interactable = GetLevel(key) < maxLevel && GameSession.CoinCount >= GetCost(key);
+            var label = button.GetComponentInChildren<TMP_Text>();
+            if (label != null) label.text = GetLevel(key) >= maxLevel ? "Maximum" : $"{GetCost(key)} Münzen";
         }
 
         private void UpdateUpgradeLabel(TMP_Text label, string displayName, string key, int maxLevel)
@@ -180,7 +275,7 @@ namespace RhythmWitchClone.Levels
             int level = GetLevel(key);
             label.text = level >= maxLevel
                 ? $"{displayName}: Stufe {level} (Max)"
-                : $"{displayName}: Stufe {level} -> {GetCost(key)} Münzen";
+                : $"<b>{displayName}</b>\nStufe {level} / {maxLevel}";
         }
     }
 }

@@ -1,0 +1,1 @@
+PASS: eight assigned letters in all three scenes; four visible notes; DEF/ATK/SPC foreground switching, enlargement and preserved fan angles; illustrated HP/mana at 50% and 100%; SPC rejection feedback at 99% and actual shockwave creation/mana consumption at 100%; serialized map and HUD. Editor preview checks, not a full Play Mode test.

@@ -1,0 +1,238 @@
+
+
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│                                                                              │
+│                         ▄▀▀ ▄▀█ █▀▀ ▀█▀ █▀▄▀█ █▀▀ █▀█                        │
+│                         █▀  █▀█ ▄▄█  █  █ ▀ █ █▄▄ █▀▀                        │
+│                                                                              │
+│                                                                              │
+│                                                                              │
+│                                FastMCP 3.4.11                                │
+│                            https://gofastmcp.com                             │
+│                                                                              │
+│                 🖥  Server:      mcp-for-unity-server, 3.4.11                 │
+│                 🚀 Deploy free: https://horizon.prefect.io                   │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────╮
+│                          🎉 Update available: 4.1.6                          │
+│                      Run: pip install --upgrade fastmcp                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+
+[11/03/26 09:56:39] INFO     Starting MCP server                transport.py:361
+                             'mcp-for-unity-server' with                        
+                             transport 'http' on                                
+                             http://127.0.0.1:8080/mcp                          
+INFO:     Started server process [6416]
+INFO:     Waiting for application startup.
+2026-11-03 09:56:39,228 - mcp.server.streamable_http_manager - INFO - StreamableHTTP session manager started
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
+INFO:     127.0.0.1:36562 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 09:56:39,365 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 09:56:39,434 - transport.plugin_hub - INFO - Registered 36 tools for session 71266f3b-e320-4b16-86cd-ee6685398736
+2026-11-03 09:56:39,434 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 09:57:14,526 - mcp.server.streamable_http_manager - INFO - Created new transport with session ID: 808d6aeccf114b50ac49fefe4dd56c08
+INFO:     127.0.0.1:33068 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33068 - "POST /mcp HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:33068 - "GET /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33076 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51276 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51284 - "POST /mcp HTTP/1.1" 200 OK
+[11/03/26 09:57:38] DEBUG    Sending INFO to client: Listing     context.py:1446
+                             Unity instances                                    
+INFO:     127.0.0.1:51284 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51876 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51876 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39838 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33412 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36288 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50418 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:10:06,349 - transport.plugin_hub - INFO - Plugin session 71266f3b-e320-4b16-86cd-ee6685398736 disconnected (1005)
+INFO:     127.0.0.1:51360 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:10:08,754 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:10:09,454 - transport.plugin_hub - INFO - Registered 36 tools for session 905a9e96-c044-40ee-8ec9-6cf60735873f
+2026-11-03 10:10:09,454 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:10:09,454 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:51374 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51386 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39502 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39510 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42036 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50392 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:10:47,452 - transport.plugin_hub - INFO - Plugin session 905a9e96-c044-40ee-8ec9-6cf60735873f disconnected (1005)
+INFO:     127.0.0.1:50408 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:10:51,045 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:10:51,079 - transport.plugin_hub - INFO - Registered 36 tools for session a89e9b2d-23ec-495e-99d2-09617fcfe9b6
+2026-11-03 10:10:51,079 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:10:51,079 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:50420 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50430 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43262 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60442 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60442 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54874 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37256 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:13:04,123 - transport.plugin_hub - INFO - Plugin session a89e9b2d-23ec-495e-99d2-09617fcfe9b6 disconnected (1005)
+INFO:     127.0.0.1:52494 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:13:06,500 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:13:07,323 - transport.plugin_hub - INFO - Registered 36 tools for session 2a1892ee-4af4-4d23-94e5-1bd83edf1c91
+2026-11-03 10:13:07,323 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:13:07,323 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:52498 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52508 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52508 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52508 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:13:13,651 - transport.plugin_hub - INFO - Plugin session 2a1892ee-4af4-4d23-94e5-1bd83edf1c91 disconnected (1005)
+INFO:     127.0.0.1:50646 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:13:17,169 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:13:17,202 - transport.plugin_hub - INFO - Registered 36 tools for session cf7aa224-0156-49ac-853d-5d80879b3e48
+2026-11-03 10:13:17,202 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:13:17,202 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:50654 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50668 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56292 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47736 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47750 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53534 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53546 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34428 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34436 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:14:31,709 - transport.plugin_hub - INFO - Plugin session cf7aa224-0156-49ac-853d-5d80879b3e48 disconnected (1005)
+INFO:     127.0.0.1:34446 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:14:34,125 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:14:34,842 - transport.plugin_hub - INFO - Registered 36 tools for session 89ce3a4b-68f4-400f-bad7-3276d4d7e0ff
+2026-11-03 10:14:34,842 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:14:34,842 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:37430 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37438 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37438 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37438 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:14:58,587 - transport.plugin_hub - INFO - Plugin session 89ce3a4b-68f4-400f-bad7-3276d4d7e0ff disconnected (1005)
+INFO:     127.0.0.1:37446 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:15:02,185 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:15:02,221 - transport.plugin_hub - INFO - Registered 36 tools for session 76008c6b-ebcc-4d3b-aa3f-bb72e542ee3f
+2026-11-03 10:15:02,221 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:15:02,222 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:37438 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38194 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38206 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41438 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41444 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41446 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51282 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51282 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49772 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52602 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52608 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52618 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34348 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:18:02,052 - transport.plugin_hub - INFO - Plugin session 76008c6b-ebcc-4d3b-aa3f-bb72e542ee3f disconnected (1005)
+INFO:     127.0.0.1:34364 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:18:04,623 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:18:04,663 - transport.plugin_hub - INFO - Registered 36 tools for session 90721f00-f301-4dab-a759-a88e1b44db0e
+2026-11-03 10:18:04,663 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:18:04,663 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:34366 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34366 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34366 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34366 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:18:07,095 - transport.plugin_hub - INFO - Plugin session 90721f00-f301-4dab-a759-a88e1b44db0e disconnected (1005)
+INFO:     127.0.0.1:50042 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:18:10,703 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:18:10,745 - transport.plugin_hub - INFO - Registered 36 tools for session c8b040dd-2223-4dbc-ab92-596fad93bde5
+2026-11-03 10:18:10,745 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:18:10,745 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:50056 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49964 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49964 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43472 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45312 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45312 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52554 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57612 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51224 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51224 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51236 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51236 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:20:01,552 - transport.plugin_hub - INFO - Plugin session c8b040dd-2223-4dbc-ab92-596fad93bde5 disconnected (1005)
+INFO:     127.0.0.1:51240 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:20:04,415 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:20:04,452 - transport.plugin_hub - INFO - Registered 36 tools for session 44b0336d-0eb9-45a1-b8f8-4d11b13e1ee4
+2026-11-03 10:20:04,453 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:20:04,453 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:43570 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43584 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43586 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43586 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:20:22,226 - transport.plugin_hub - INFO - Plugin session 44b0336d-0eb9-45a1-b8f8-4d11b13e1ee4 disconnected (1005)
+INFO:     127.0.0.1:43602 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:20:25,744 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:20:25,784 - transport.plugin_hub - INFO - Registered 36 tools for session 092c6461-45a9-42d4-ae3f-a16299356bcf
+2026-11-03 10:20:25,784 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:20:25,785 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:46062 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46078 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55008 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55020 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55020 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55020 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39484 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39492 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39492 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:21:21,970 - transport.plugin_hub - INFO - Plugin session 092c6461-45a9-42d4-ae3f-a16299356bcf disconnected (1005)
+INFO:     127.0.0.1:39498 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:21:24,411 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:21:25,132 - transport.plugin_hub - INFO - Registered 36 tools for session 78486137-cb62-4109-8dce-fda326ecc610
+2026-11-03 10:21:25,132 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:21:25,132 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:55698 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55700 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55702 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 10:21:30,884 - transport.plugin_hub - INFO - Plugin session 78486137-cb62-4109-8dce-fda326ecc610 disconnected (1005)
+INFO:     127.0.0.1:55716 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 10:21:34,440 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 10:21:34,482 - transport.plugin_hub - INFO - Registered 36 tools for session 84e590ca-aa56-46f0-ac54-7923388986ac
+2026-11-03 10:21:34,482 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 10:21:34,482 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+INFO:     127.0.0.1:32930 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58014 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34910 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36820 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36826 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36826 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60500 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60510 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45430 - "POST /mcp HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45444 - "POST /mcp HTTP/1.1" 200 OK
+2026-11-03 11:56:23,289 - transport.plugin_hub - INFO - Plugin session 84e590ca-aa56-46f0-ac54-7923388986ac disconnected (1005)
+INFO:     127.0.0.1:34670 - "WebSocket /hub/plugin" [accepted]
+INFO:     connection open
+2026-11-03 11:56:36,178 - transport.plugin_hub - INFO - Plugin registered: Rhythmancy (c572877291e3bc2e)
+2026-11-03 11:56:36,331 - transport.plugin_hub - INFO - Registered 36 tools for session 4f9e5fcd-15fb-43fc-b183-aff545e69012
+2026-11-03 11:56:36,331 - transport.plugin_hub - INFO - Server-level tool visibility synced from Unity: enabled=[animation, asset_gen, core, docs, probuilder, profiling, scripting_ext, testing, ui, vfx], disabled=[], total_transforms=19, unity_start=9
+2026-11-03 11:56:36,331 - transport.plugin_hub - INFO - Sent tools/list_changed notification to 1 MCP session(s)
+2026-11-03 12:28:20,869 - transport.plugin_hub - INFO - Plugin session 4f9e5fcd-15fb-43fc-b183-aff545e69012 disconnected (1005)
+INFO:     Shutting down
+INFO:     Waiting for connections to close. (CTRL+C to force quit)
+ERROR:    ASGI callable returned without completing response.
+INFO:     Waiting for application shutdown.
+2026-11-03 12:28:22,395 - mcp.server.streamable_http - INFO - Terminating session: 808d6aeccf114b50ac49fefe4dd56c08
+2026-11-03 12:28:22,396 - mcp.server.streamable_http_manager - INFO - StreamableHTTP session manager shutting down
+INFO:     Application shutdown complete.
+INFO:     Finished server process [6416]

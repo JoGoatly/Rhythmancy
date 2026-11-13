@@ -1,0 +1,1 @@
+PASS: Play Mode stats, starter ATK/DEF, damage reduction, medallion stat purchase, custom sheet purchase/equip/boosts/music, music pause restoration, SPC and isolated save-file roundtrip.

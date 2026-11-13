@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8918295d4d3445b94c965dde62301d0, type: 3}
+  m_Name: StoryIntro
+  m_EditorClassIdentifier:
+  slides:
+  - image: {fileID: 21300000, guid: 7487839b52c83dce3b9b969535c5508b, type: 3}
+    text: "Vor langer Zeit gab es einen Wald voller Magie und Musik.\n\nDoch eines Tages sollte sich alles verändern."
+  - image: {fileID: 21300000, guid: 451f582c58ff742bf9e65f6a65950843, type: 3}
+    text: "Eine mächtige Hexe wollte die Magie des Waldes kontrollieren.\n\nDafür spielte sie eine verbotene Melodie."
+  - image: {fileID: 21300000, guid: 3c10269ddb674545ebf6cd95a37c0af6, type: 3}
+    text: "Doch der Zauber ging schief!\n\nDie Musiknoten erwachten zum Leben und griffen jeden an, der den Wald betrat."
+  - image: {fileID: 21300000, guid: 41fb506a7f4d31154b0e80be8b378f28, type: 3}
+    text: "Auch ein Geigenspieler geriet vor vielen Jahren in den verfluchten Wald.\n\nSeitdem war er verschwunden."
+  - image: {fileID: 21300000, guid: ce18e89064855f6ccaf065a6d64d27b2, type: 3}
+    text: "Viele Jahre später erwachte der Musiker durch die Magie des Waldes erneut.\n\nJetzt war er ein Skelett. Doch seine Geige war noch immer bei ihm."
+  - image: {fileID: 21300000, guid: e01be8651f4e5da38a3a020ed32dc4d5, type: 3}
+    text: "Mit seiner Geige kann er sich gegen die lebendigen Noten wehren.\n\nJetzt muss er die Hexe finden und besiegen, um den Fluch zu brechen und den Wald zu retten!"

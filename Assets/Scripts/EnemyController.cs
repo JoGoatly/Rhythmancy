@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using RhythmWitchClone.Audio;
 using RhythmWitchClone.Levels;
+using RhythmWitchClone.Core;
 
 namespace RhythmWitchClone.Gameplay
 {
@@ -483,8 +484,7 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         public void TakeDamage(int amount, Vector3 hitSourcePosition)
         {
-            if (_isDying) return; // läuft schon die Todes-Animation - keine weiteren Treffer
-
+            if (_isDying || _currentHealth <= 0 || amount <= 0) return;
             _currentHealth -= amount;
             ShowDamageText(amount);
 
@@ -500,6 +500,8 @@ namespace RhythmWitchClone.Gameplay
 
             if (_currentHealth <= 0)
             {
+                GameSession.RecordEnemyDefeated();
+                if (AchievementManager.Instance != null) AchievementManager.Instance.RecordEnemyDefeated();
                 StartDeath(knockDirection, force);
                 return;
             }

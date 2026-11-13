@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
+using RhythmWitchClone.Core;
 using RhythmWitchClone.Gameplay;
 
 namespace RhythmWitchClone.Levels
@@ -38,10 +40,12 @@ namespace RhythmWitchClone.Levels
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             if (!_playerInRange) return;
             if (levelSelectPanel != null && levelSelectPanel.activeSelf) return; // schon offen
 
-            if (Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
+            Key key = RhythmancySettings.GetKeyForAction("Interaktion");
+            if (Keyboard.current != null && key != Key.None && Keyboard.current[key].wasPressedThisFrame)
             {
                 OpenLevelSelect();
             }
@@ -52,7 +56,7 @@ namespace RhythmWitchClone.Levels
             if (!other.CompareTag("Player")) return;
 
             _playerInRange = true;
-            if (keyPromptUI != null) keyPromptUI.SetActive(true);
+            ShowInteractionPrompt();
         }
 
         private void OnTriggerExit(Collider other)
@@ -77,8 +81,16 @@ namespace RhythmWitchClone.Levels
         public void CloseLevelSelect()
         {
             if (levelSelectPanel != null) levelSelectPanel.SetActive(false);
-            if (keyPromptUI != null && _playerInRange) keyPromptUI.SetActive(true);
+            if (_playerInRange) ShowInteractionPrompt();
             if (beatLane != null) beatLane.SetActive(true);
+        }
+
+        private void ShowInteractionPrompt()
+        {
+            if (keyPromptUI == null) return;
+            TMP_Text label = keyPromptUI.GetComponentInChildren<TMP_Text>(true);
+            if (label != null) label.text = $"[{RhythmancySettings.GetBinding("Interaktion")}]  LEVEL AUSWÄHLEN";
+            keyPromptUI.SetActive(true);
         }
     }
 }

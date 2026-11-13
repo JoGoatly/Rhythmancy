@@ -46,7 +46,7 @@ namespace RhythmWitchClone.UI.Pause
         [SerializeField] private Button cancelLeaveButton;         // "Abbrechen"
 
         [Header("Szene")]
-        [SerializeField] private string mainMenuSceneName = "MainMenu";
+        [SerializeField] private string mainMenuSceneName = "Menü";
 
         [Header("Speichern")]
         [Tooltip("Der Spieler, dessen Position/Blickrichtung beim Speichern mit gesichert wird. Wird auch für die Game-Over-Erkennung (CurrentHealth) genutzt.")]
@@ -108,11 +108,6 @@ namespace RhythmWitchClone.UI.Pause
 
         private void Update()
         {
-            if (!_isGameOver && Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                TogglePause();
-            }
-
             // Läuft bewusst unabhängig von _isPaused/Time.timeScale weiter, damit die Anzeige
             // auch während das Spiel pausiert ist (Time.timeScale = 0) aktuell bleibt.
             RefreshMusicDisplay();

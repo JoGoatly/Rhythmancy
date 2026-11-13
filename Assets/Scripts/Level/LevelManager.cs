@@ -174,6 +174,7 @@ namespace RhythmWitchClone.Levels
         private Vector3 _mapCenter;
         private Vector2 _mapSize;
 
+        public int CurrentWave { get; private set; } = 1;
         public int CurrentChapterIndex { get; private set; } = -1;
         public int CurrentLevelIndex { get; private set; } = -1;
 
@@ -276,6 +277,14 @@ namespace RhythmWitchClone.Levels
         /// Lädt die Kapitel-Szene und merkt sich das Level - Umgebung und Gegner werden nach dem
         /// Laden automatisch in OnSceneLoaded erzeugt.
         /// </summary>
+        public void RestoreContext(int chapterIndex, int levelIndex)
+        {
+            CurrentChapterIndex = -1; CurrentLevelIndex = -1;
+            if (chapterIndex < 0 || chapterIndex >= chapters.Count) return;
+            if (levelIndex < 0 || levelIndex >= chapters[chapterIndex].levels.Count) return;
+            CurrentChapterIndex = chapterIndex; CurrentLevelIndex = levelIndex;
+        }
+
         public void LoadLevel(int chapterIndex, int levelIndex)
         {
             if (chapterIndex < 0 || chapterIndex >= chapters.Count) return;
@@ -295,6 +304,8 @@ namespace RhythmWitchClone.Levels
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (mode == LoadSceneMode.Additive) return;
+            CurrentWave = 1;
             _bushPositions.Clear();
             _bushRadii.Clear();
             _bushSpeedMultiplier = 1f;
@@ -361,7 +372,46 @@ namespace RhythmWitchClone.Levels
             Vector3 playerPosition = player != null ? player.transform.position : chapter.mapSettings.mapCenter;
 
             GenerateEnvironment(chapter.mapSettings, root.transform, playerPosition, chapter.chapterName);
-            SpawnEnemies(chapter.levels[CurrentLevelIndex], chapter.mapSettings, root.transform, playerPosition);
+            if (scene.name == "Tutorial Level")
+            {
+                if (player != null) player.SetAutoWinCheckEnabled(false);
+                StartCoroutine(RunTutorialWaves(chapter.levels[CurrentLevelIndex], chapter.mapSettings, root.transform, player));
+            }
+            else
+            {
+                SpawnEnemies(chapter.levels[CurrentLevelIndex], chapter.mapSettings, root.transform, playerPosition);
+            }
+        }
+
+        private IEnumerator RunTutorialWaves(Level level, MapSettings map, Transform root, PlayerController player)
+        {
+            EnemySpawn template = level.enemies.Find(spawn => spawn.enemyPrefab != null);
+            if (template == null)
+            {
+                Debug.LogError("Tutorial Level: Kein Gegner-Prefab für die Wellen konfiguriert.");
+                yield break;
+            }
+
+            for (int wave = 1; wave <= 5; wave++)
+            {
+                if (root == null || player == null) yield break;
+                CurrentWave = wave;
+                Level waveLevel = new Level();
+                waveLevel.enemies.Add(new EnemySpawn { enemyPrefab = template.enemyPrefab, count = wave });
+                SpawnEnemies(waveLevel, map, root, player.transform.position);
+
+                // Erst nach dem letzten besiegten Gegner beginnt die nächste Welle.
+                do
+                {
+                    yield return null;
+                    if (root == null || player == null) yield break;
+                }
+                while (Time.timeScale <= 0f || root.GetComponentsInChildren<EnemyController>().Length > 0);
+
+                GameSession.CompleteWave(wave);
+            }
+
+            player.WinLevel();
         }
 
         /// <summary>
@@ -425,6 +475,8 @@ namespace RhythmWitchClone.Levels
             // Sicherstellen, dass alle Collider der frisch geladenen Szene für die Abstandsprüfung bekannt sind.
             Physics.SyncTransforms();
             PrepareMapArea(map, playerPosition, displayName);
+
+            if (GameObject.Find("Handdrawn Forest Map") != null) return;
 
             Quaternion cameraRotation = Camera.main != null ? Camera.main.transform.rotation : Quaternion.identity;
 

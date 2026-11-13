@@ -223,6 +223,7 @@ namespace RhythmWitchClone.Gameplay
 
         private void Start()
         {
+            ApplyCharacterStats();
             CurrentHealth = maxHealth;
             UpdateCoinUI();
             if (winPanel != null) winPanel.SetActive(false);
@@ -230,7 +231,6 @@ namespace RhythmWitchClone.Gameplay
 
             ApplyCursor(false);
 
-            ApplyUpgrades();
             LoadFromSave();
         }
 
@@ -245,7 +245,7 @@ namespace RhythmWitchClone.Gameplay
             if (GameSession.SelectedSaveSlot < 0) return;
 
             SaveData data = SaveSystem.Load(GameSession.SelectedSaveSlot);
-            if (!data.exists) return;
+            if (!data.exists || (!string.IsNullOrEmpty(data.sceneName) && data.sceneName != gameObject.scene.name)) return;
 
             ApplySaveData(data);
         }
@@ -256,13 +256,19 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         public void ApplySaveData(SaveData data)
         {
-            Vector3 savedPosition = new Vector3(data.playerPosX, data.playerPosY, data.playerPosZ);
+            bool hasPosition = data.hasPlayerPosition || !Mathf.Approximately(data.playerPosX, 0f) ||
+                               !Mathf.Approximately(data.playerPosY, 0f) || !Mathf.Approximately(data.playerPosZ, 0f) || data.playerFacingRight;
+            if (hasPosition)
+            {
+                Vector3 savedPosition = new Vector3(data.playerPosX, data.playerPosY, data.playerPosZ);
+                // CharacterController kurz deaktivieren, da er sonst die gespeicherte Position korrigiert.
+                _controller.enabled = false;
+                transform.position = savedPosition;
+                _controller.enabled = true;
+            }
 
-            // CharacterController kurz deaktivieren, da er sonst eigene Kollisions-Korrekturen
-            // auf eine direkte Positionsänderung anwendet und die Teleportation verfälschen kann.
-            _controller.enabled = false;
-            transform.position = savedPosition;
-            _controller.enabled = true;
+            // Ältere Speicherstände enthalten currentHealth = 0 und starten daher mit voller HP.
+            CurrentHealth = data.currentHealth > 0 ? Mathf.Clamp(data.currentHealth, 1, maxHealth) : maxHealth;
 
             if (visualTransform != null)
             {
@@ -281,6 +287,9 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         public void WriteToSaveData(SaveData data)
         {
+            data.sceneName = gameObject.scene.name;
+            data.hasPlayerPosition = true;
+            data.currentHealth = CurrentHealth;
             data.playerPosX = transform.position.x;
             data.playerPosY = transform.position.y;
             data.playerPosZ = transform.position.z;
@@ -338,6 +347,24 @@ namespace RhythmWitchClone.Gameplay
         /// wirkt sich also erst beim nächsten Betreten einer Szene aus, nicht sofort beim Kauf
         /// in der Safe Zone (das Panel dort ist ohnehin eine andere Szene als das eigentliche Level).
         /// </summary>
+        public void ApplyCharacterStats()
+        {
+            var character = GetComponent<MainCharacter>();
+            if (character == null) { ApplyUpgrades(); return; }
+            var stats = character.Stats;
+            maxHealth = stats.maxHealth;
+            moveSpeed = stats.moveSpeed;
+            baseAuraDamage = stats.auraDamage;
+            auraRadius = stats.auraRadius;
+            projectilesEnabled = stats.projectilesEnabled;
+            baseProjectileDamage = stats.projectileDamage;
+            coinMagnetRange = stats.coinMagnetRange;
+            ApplyUpgrades(); // Existing purchased upgrades remain effective.
+            _projectilesPerShot += stats.projectileCount - 1;
+            CurrentHealth = Mathf.Clamp(CurrentHealth, 0, maxHealth);
+            UpdateHealthUI();
+        }
+
         private void ApplyUpgrades()
         {
             int damageLevel = GameSession.GetUpgradeLevel(UpgradeController.ProjectileDamageKey);
@@ -881,8 +908,8 @@ namespace RhythmWitchClone.Gameplay
             if (Keyboard.current == null) return 0f;
 
             float value = 0f;
-            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) value -= 1f;
-            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) value += 1f;
+            if (IsBindingPressed("Links") || Keyboard.current.leftArrowKey.isPressed) value -= 1f;
+            if (IsBindingPressed("Rechts") || Keyboard.current.rightArrowKey.isPressed) value += 1f;
             return value;
         }
 
@@ -891,9 +918,16 @@ namespace RhythmWitchClone.Gameplay
             if (Keyboard.current == null) return 0f;
 
             float value = 0f;
-            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) value -= 1f;
-            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) value += 1f;
+            if (IsBindingPressed("Runter") || Keyboard.current.downArrowKey.isPressed) value -= 1f;
+            if (IsBindingPressed("Hoch") || Keyboard.current.upArrowKey.isPressed) value += 1f;
             return value;
+        }
+
+        private static bool IsBindingPressed(string action)
+        {
+            if (Keyboard.current == null) return false;
+            Key key = RhythmancySettings.GetKeyForAction(action);
+            return key != Key.None && Keyboard.current[key].isPressed;
         }
 
         private void HandleFlip()

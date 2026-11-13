@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MainMenu.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+    path: "Assets/Scenes/Men\xFC.unity"
+    guid: 9a27d8003b1bfc069b2a4fb929804bea
   - enabled: 1
     path: Assets/Scenes/Tutorial.unity
     guid: 3a2ac7e8f083afc40b1a377fcdef3398
@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/Gameasdad.unity
     guid: f81b2a45a2953504492f2a495cbb8d8e
+  - enabled: 1
+    path: Assets/Scenes/PauseMenu.unity
+    guid: 9558869e8f813eb7e99414a0b334a85c
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

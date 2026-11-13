@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da02c18a55b906f859113a5717cc09c2, type: 3}
+  m_Name: RhythmancyAchievements
+  m_EditorClassIdentifier: 
+  definitions:
+  - id: first_note
+    title: Erster Ton
+    description: Besiege deinen ersten Gegner.
+    target: 1
+    icon: {fileID: 0}
+  - id: survivor_5
+    title: "\xDCberlebensk\xFCnstler"
+    description: "\xDCberlebe 5 Wellen."
+    target: 5
+    icon: {fileID: 0}
+  - id: fighter_100
+    title: "Musikalischer K\xE4mpfer"
+    description: Besiege insgesamt 100 Gegner.
+    target: 100
+    icon: {fileID: 0}
+  - id: unstoppable_10
+    title: Unaufhaltsam
+    description: "\xDCberlebe 10 Wellen."
+    target: 10
+    icon: {fileID: 0}

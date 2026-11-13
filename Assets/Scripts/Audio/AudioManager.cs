@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using RhythmWitchClone.Core;
 
 namespace RhythmWitchClone.Audio
 {
@@ -33,17 +34,58 @@ namespace RhythmWitchClone.Audio
         [Tooltip("Wird in JEDER anderen Szene (Safe Zone, Level, ...) der Reihe nach abgespielt (Track 1, dann 2, dann 3, ... danach wieder von vorn) - für Abwechslung statt Dauerschleife auf einem Track.")]
         [SerializeField] private List<AudioClip> gameMusicPlaylist = new List<AudioClip>();
         [Tooltip("Exakter Szenen-Name (Datei ohne .unity) des Hauptmenüs - ausschließlich dort spielt mainMenuMusic.")]
-        [SerializeField] private string mainMenuSceneName = "MainMenu";
+        [SerializeField] private string mainMenuSceneName = "Menü";
 
         // Eigene AudioSource des AudioManagers, ausschließlich für die automatische Musik-Wiedergabe.
         // Ist die EINZIGE AudioSource, die als Musik gilt (siehe ApplyVolumeToSource).
         private AudioSource _musicPlaybackSource;
         private int _currentPlaylistIndex = -1; // -1 = kein Playlist-Modus aktiv (z.B. Hauptmenü-Track läuft)
         private bool _isMusicPaused;
+        private Object _sheetMusicOwner;
+        private AudioClip _previousMusic;
+        private float _previousMusicTime;
+        private int _previousPlaylistIndex;
+        private bool _previousLoop;
+
+        public void SetSheetMusic(Object owner, AudioClip clip)
+        {
+            if (clip == null) { ClearSheetMusic(owner); return; }
+            if (_musicPlaybackSource == null) return;
+            if (_sheetMusicOwner == null)
+            {
+                _previousMusic = _musicPlaybackSource.clip;
+                _previousMusicTime = _musicPlaybackSource.time;
+                _previousPlaylistIndex = _currentPlaylistIndex;
+                _previousLoop = _musicPlaybackSource.loop;
+            }
+            _sheetMusicOwner = owner;
+            _currentPlaylistIndex = -1;
+            _musicPlaybackSource.clip = clip;
+            _musicPlaybackSource.loop = true;
+            _musicPlaybackSource.Play();
+            if (_isMusicPaused) _musicPlaybackSource.Pause();
+        }
+
+        public void ClearSheetMusic(Object owner)
+        {
+            if (_sheetMusicOwner != owner || _sheetMusicOwner == null || _musicPlaybackSource == null) return;
+            _sheetMusicOwner = null;
+            _musicPlaybackSource.clip = _previousMusic;
+            _musicPlaybackSource.loop = _previousLoop;
+            _currentPlaylistIndex = _previousPlaylistIndex;
+            if (_previousMusic != null)
+            {
+                _musicPlaybackSource.time = Mathf.Clamp(_previousMusicTime, 0, Mathf.Max(0, _previousMusic.length - .01f));
+                _musicPlaybackSource.Play();
+                if (_isMusicPaused) _musicPlaybackSource.Pause();
+            }
+            else _musicPlaybackSource.Stop();
+        }
 
         [Header("Lautstärke (0 - 1)")]
         [Range(0f, 1f)][SerializeField] private float musicVolume = 1f;
         [Range(0f, 1f)][SerializeField] private float sfxVolume = 1f;
+        [Range(0f, 1f)][SerializeField] private float masterVolume = 1f;
 
         private const string MusicVolumeKey = "audio_music_volume";
         private const string SfxVolumeKey = "audio_sfx_volume";
@@ -65,6 +107,9 @@ namespace RhythmWitchClone.Audio
 
             musicVolume = PlayerPrefs.GetFloat(MusicVolumeKey, 1f);
             sfxVolume = PlayerPrefs.GetFloat(SfxVolumeKey, 1f);
+            masterVolume = RhythmancySettings.MasterVolume;
+            musicVolume = RhythmancySettings.MusicVolume;
+            sfxVolume = RhythmancySettings.SfxVolume;
 
             // Eigene AudioSource für die automatische Musik-Wiedergabe einrichten.
             _musicPlaybackSource = GetComponent<AudioSource>();
@@ -107,6 +152,9 @@ namespace RhythmWitchClone.Audio
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            // PauseMenu ist ein Overlay und soll den laufenden Titel nicht durch Spielmusik ersetzen.
+            if (scene.name == "PauseMenu") return;
+            _sheetMusicOwner = null;
             // Neue Szene = evtl. neue AudioSources (z.B. Level-Musik, Ambiente-SFX).
             RefreshKnownAudioSources();
             ApplyVolumes();
@@ -402,24 +450,28 @@ namespace RhythmWitchClone.Audio
             // (spielt ausschließlich mainMenuMusic oder Tracks aus gameMusicPlaylist ab).
             // Absolut jede andere AudioSource in der Szene wird als SFX behandelt.
             bool isMusic = source == _musicPlaybackSource;
-            source.volume = baseVolume * (isMusic ? musicVolume : sfxVolume);
+            source.volume = baseVolume * masterVolume * (isMusic ? musicVolume : sfxVolume);
         }
 
         public void SetMusicVolume(float value)
         {
-            musicVolume = Mathf.Clamp01(value);
-            PlayerPrefs.SetFloat(MusicVolumeKey, musicVolume);
-            ApplyVolumes();
+            RhythmancySettings.SetMusicVolume(value);
         }
 
         public void SetSfxVolume(float value)
         {
-            sfxVolume = Mathf.Clamp01(value);
-            PlayerPrefs.SetFloat(SfxVolumeKey, sfxVolume);
-            ApplyVolumes();
+            RhythmancySettings.SetSfxVolume(value);
         }
 
         public float GetMusicVolume() => musicVolume;
         public float GetSfxVolume() => sfxVolume;
+
+        public void SetMenuVolumes(float master, float music, float sfx)
+        {
+            masterVolume = Mathf.Clamp01(master);
+            musicVolume = Mathf.Clamp01(music);
+            sfxVolume = Mathf.Clamp01(sfx);
+            ApplyVolumes();
+        }
     }
 }

@@ -50,13 +50,14 @@ namespace RhythmWitchClone.Gameplay
         }
 
         [Header("Tasten")]
-        [Tooltip("Ein Eintrag = ein Zeichen mit Icon + eigener Noten-Aura-Bilderliste. Reihenfolge bestimmt die Reihenfolge in der Spur.")]
+        [Tooltip("Ein Eintrag = ein Zeichen mit Icon + eigener Noten-Aura-Bilderliste. Alle Einträge bilden den Zufallspool für die Spur.")]
         [SerializeField] private List<LaneKeyDefinition> laneKeys = new List<LaneKeyDefinition>();
 
         [Header("Spur (UI)")]
         [Tooltip("RectTransform im Canvas mit Pivot/Anchor links-mittig (0, 0.5) - markiert die volle Breite der Spur.")]
         [SerializeField] private RectTransform laneContainer;
         [SerializeField] private float noteIconSize = 64f;
+        [SerializeField, Range(2, 8)] private int visibleNoteCount = 4;
 
         [Header("Ziel-Markierung (manuell im Editor platziert)")]
         [Tooltip("Selbst gebautes/positioniertes RectTransform als Kind von 'Lane Container', das die Hit-Zone markiert. Die X-Position bestimmt automatisch, wo getroffen werden muss - einfach im Editor an die gewünschte Stelle ziehen.")]
@@ -64,7 +65,9 @@ namespace RhythmWitchClone.Gameplay
 
         [Header("Takt")]
         [Tooltip("Schläge pro Minute. Die Geschwindigkeit wird automatisch so berechnet, dass bei gleichmäßigem Tastendruck exakt in diesem Takt IMMER eine Note auf der Hit-Zone steht - unabhängig von der Tasten-Anzahl.")]
-        [SerializeField] private float beatsPerMinute = 120f;
+        [SerializeField] private float beatsPerMinute = 40f;
+        [Tooltip("Abstände in Taktschlägen; leer = gleichmäßiger Takt. Beispiel: 1, 2, 1, 3.")]
+        [SerializeField] private float[] beatSpacingPattern = new float[0];
 
         [Header("Genauigkeit")]
         [Tooltip("Ab welchem Anteil der halben Icon-Größe (0-1) ein Treffer noch als 'Perfekt' zählt (0 = exakte Mitte).")]
@@ -167,6 +170,7 @@ namespace RhythmWitchClone.Gameplay
 
         private void Update()
         {
+            if (Time.timeScale <= 0f) return;
             UpdateNotePositionsAndAnimation();
             HandleHitInput();
             UpdateFeedbackText();
@@ -213,14 +217,28 @@ namespace RhythmWitchClone.Gameplay
         {
             if (laneKeys.Count == 0 || laneContainer == null) return;
 
-            // Anzahl = einfach alle konfigurierten Tasten, keine Begrenzung/Upgrade-Kopplung mehr.
-            int count = laneKeys.Count;
+            // Sichtbare Kacheln und der Pool der acht möglichen Buchstaben sind unabhängig.
+            int count = Mathf.Clamp(visibleNoteCount, 2, 8);
 
+            // Auch beim kürzesten Beat-Abstand bleibt Platz zwischen den Kacheln.
+            float spacingSum = 0f;
+            float minSpacing = float.MaxValue;
+            for (int i = 0; i < count; i++)
+            {
+                spacingSum += GetBeatSpacing(i);
+                minSpacing = Mathf.Min(minSpacing, GetBeatSpacing(i));
+            }
+            laneContainer.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,
+                Mathf.Max(laneContainer.rect.width, (noteIconSize + 20f) * spacingSum / minSpacing));
             _laneLength = laneContainer.rect.width;
 
-            // Geschwindigkeit so berechnen, dass der Zeitabstand zwischen zwei aufeinanderfolgenden
-            // "Note steht auf der Hit-Zone"-Momenten exakt einer Taktlänge (60 / BPM Sekunden) entspricht.
-            _moveSpeed = (_laneLength / count) * (beatsPerMinute / 60f);
+            // Ein Umlauf enthält die Summe der Abstände in Beats. Dadurch bleiben auch
+            // unterschiedliche Pausen auf dem BPM-Raster, einschließlich des letzten Abstands.
+            float totalBeats = 0f;
+            for (int i = 0; i < count; i++) totalBeats += GetBeatSpacing(i);
+            _moveSpeed = (_laneLength / totalBeats) * (beatsPerMinute / 60f);
+            _currentBasePosition = 0f;
+            float elapsedBeats = 0f;
 
             for (int i = 0; i < count; i++)
             {
@@ -236,10 +254,12 @@ namespace RhythmWitchClone.Gameplay
                 rectTransform.sizeDelta = new Vector2(noteIconSize, noteIconSize);
 
                 Image image = noteObject.GetComponent<Image>();
+                image.preserveAspect = true;
                 image.raycastTarget = false; // Noten sollen keine UI-Klicks blockieren
                 image.sprite = laneKeys[keyIndex].icon;
 
-                float positionOffset = i * (_laneLength / count);
+                float positionOffset = elapsedBeats / totalBeats * _laneLength;
+                elapsedBeats += GetBeatSpacing(i);
 
                 _notes.Add(new LaneNote
                 {
@@ -251,6 +271,12 @@ namespace RhythmWitchClone.Gameplay
                     PreviousPosition = positionOffset // Startwert = Position im allerersten Frame
                 });
             }
+        }
+
+        private float GetBeatSpacing(int index)
+        {
+            if (beatSpacingPattern == null || beatSpacingPattern.Length == 0) return 1f;
+            return Mathf.Max(1f, beatSpacingPattern[index % beatSpacingPattern.Length]);
         }
 
         private void UpdateNotePositionsAndAnimation()
@@ -271,16 +297,19 @@ namespace RhythmWitchClone.Gameplay
                 if (position < note.PreviousPosition)
                 {
                     AssignRandomKey(note);
+                    note.JudgedThisPass = false;
+                    note.IconImage.enabled = true;
                 }
                 note.PreviousPosition = position;
 
                 float xLocal = _laneLength - position; // position 0 (gerade gespawnt, rechts) -> x = laneLength (rechter Rand)
                 note.Transform.anchoredPosition = new Vector2(xLocal, note.Transform.anchoredPosition.y);
 
-                float delta = GetShortestDistance(position, hitZonePosition);
-                if (Mathf.Abs(delta) > noteIconSize * 0.5f)
+                // Verpasste Noten verschwinden hinter dem Trefferfenster.
+                if (position > hitZonePosition + noteIconSize * 0.5f)
                 {
-                    note.JudgedThisPass = false; // Note hat die Hit-Zone verlassen -> beim nächsten Durchgang wieder treffbar
+                    note.JudgedThisPass = true;
+                    note.IconImage.enabled = false;
                 }
 
                 UpdateHitAnimation(note);
@@ -385,45 +414,54 @@ namespace RhythmWitchClone.Gameplay
             return null;
         }
 
+        private void LateUpdate()
+        {
+            if (laneContainer == null || hitZoneMarker == null || Camera.main == null) return;
+            BillboardSprite visual = GetComponentInChildren<BillboardSprite>();
+            if (visual == null) return;
+            Renderer characterRenderer = visual.GetComponent<Renderer>();
+            if (characterRenderer == null) return;
+            Vector3 head = characterRenderer.bounds.center;
+            head.y = characterRenderer.bounds.max.y;
+            Vector3 screen = Camera.main.WorldToScreenPoint(head);
+            screen.y += 75f;
+            Canvas canvas = laneContainer.GetComponentInParent<Canvas>();
+            Camera uiCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera : null;
+            if (RectTransformUtility.ScreenPointToWorldPointInRectangle(
+                laneContainer.parent as RectTransform, screen, uiCamera, out Vector3 target))
+                laneContainer.position += target - hitZoneMarker.position;
+        }
+
         private void HandleHitInput()
         {
             if (Keyboard.current == null || _laneLength <= 0f || _resolvedKeyControls == null) return;
 
             float hitZonePosition = GetHitZonePosition();
-
-            for (int k = 0; k < laneKeys.Count; k++)
+            LaneNote next = null;
+            float nearest = float.MaxValue;
+            foreach (LaneNote note in _notes)
             {
-                KeyControl control = _resolvedKeyControls[k];
-                if (control == null || !control.wasPressedThisFrame) continue;
-
-                LaneNote bestCandidate = null;
-                float bestRatio = float.MaxValue;
-
-                foreach (LaneNote note in _notes)
-                {
-                    if (note.JudgedThisPass || note.KeyIndex != k) continue;
-
-                    float position = Mathf.Repeat(_currentBasePosition + note.PositionOffset, _laneLength);
-                    float absDistance = Mathf.Abs(GetShortestDistance(position, hitZonePosition));
-                    float ratio = absDistance / (noteIconSize * 0.5f); // 0 = exakte Mitte, 1 = gerade noch am Rand berührt
-
-                    if (ratio <= 1f && ratio < bestRatio)
-                    {
-                        bestRatio = ratio;
-                        bestCandidate = note;
-                    }
-                }
-
-                if (bestCandidate != null)
-                {
-                    RegisterHit(bestCandidate, bestRatio);
-                }
-                else
-                {
-                    ShowFeedback("Schlecht");
-                    if (AudioManager.Instance != null) AudioManager.Instance.PlayMissHitSound();
-                }
+                if (note.JudgedThisPass) continue;
+                float position = Mathf.Repeat(_currentBasePosition + note.PositionOffset, _laneLength);
+                float distance = hitZonePosition - position;
+                if (distance < -noteIconSize * 0.5f || distance >= nearest) continue;
+                nearest = distance;
+                next = note;
             }
+            if (next == null) return;
+            KeyControl control = _resolvedKeyControls[next.KeyIndex];
+            if (control == null || !control.wasPressedThisFrame) return;
+
+            float ratio = Mathf.Abs(nearest) / (noteIconSize * 0.5f);
+            if (ratio <= 1f) RegisterHit(next, ratio);
+            else
+            {
+                next.JudgedThisPass = true;
+                ShowFeedback("Zu früh");
+                if (AudioManager.Instance != null) AudioManager.Instance.PlayMissHitSound();
+            }
+            next.IconImage.enabled = false;
         }
 
         private void RegisterHit(LaneNote note, float hitRatio)

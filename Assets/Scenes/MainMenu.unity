@@ -703,7 +703,7 @@ MonoBehaviour:
     label: {fileID: 1990062097}
   backButton: {fileID: 430270484}
   mainMenuController: {fileID: 745596945}
-  tutorialSceneName: Tutorial
+  tutorialSceneName: Tutorial Level
   gameSceneName: SafeZone
 --- !u!1 &322204438
 GameObject:
@@ -954,6 +954,7 @@ MonoBehaviour:
   mainMenuSceneName: MainMenu
   musicVolume: 1
   sfxVolume: 1
+  masterVolume: 1
   coinPickupSfx: {fileID: 8300000, guid: aa97f8c6d187fe44fafbea750d8fa360, type: 3}
   projectileFiredSfx: {fileID: 8300000, guid: 72e6919ba7ba0784b9fb21aade59134a, type: 3}
   playerDamagedSfx: {fileID: 8300000, guid: 2aab01a24bc719c4ab72c8e79ef9f2e5, type: 3}

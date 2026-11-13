@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using TMPro;
+using RhythmWitchClone.Core;
+using RhythmWitchClone.Audio;
 
 namespace RhythmWitchClone.Gameplay
 {
@@ -63,6 +65,8 @@ namespace RhythmWitchClone.Gameplay
         [SerializeField] private float cardLiftSpeed = 8f;
         [Tooltip("Wie lange Karte 3 (Spezial) beim Auslösen kurz hochgezogen bleibt, bevor sie automatisch wieder absinkt.")]
         [SerializeField] private float specialCardPulseDuration = 0.3f;
+        [SerializeField] private TMP_Text specialFeedbackText;
+        private float _specialFeedbackTimer;
 
         [Header("Karte 1: Verteidigung")]
         [Tooltip("Wie viel Prozent Schaden reduziert werden, solange die Karte aktiv ist (0.3 = 30% weniger).")]
@@ -88,10 +92,18 @@ namespace RhythmWitchClone.Gameplay
         [Tooltip("Wie lange die visuelle Schockwelle sichtbar ist (länger als bei normalen Treffern wirkt mächtiger).")]
         [SerializeField] private float specialShockwaveVisualDuration = 0.8f;
 
+        private MusicSheetDefinition _activeSheet;
+        private MusicSheetDefinition _defSheet, _atkSheet, _spcSheet;
+        public float CurrentMana => _currentMana;
+        public float MaxMana => maxMana;
         private float _currentMana;
         private int _activeCardIndex = -1; // -1 = keine, 0 = Verteidigung, 1 = Angriff
         private float _specialCardPulseTimer;
         private float _defenseHealTimer;
+
+        private readonly Dictionary<RectTransform, Quaternion> _cardRotations = new Dictionary<RectTransform, Quaternion>();
+        private readonly Dictionary<RectTransform, Vector3> _cardScales = new Dictionary<RectTransform, Vector3>();
+        private int _frontCard = -2;
 
         private Vector2 _defCardBasePos;
         private Vector2 _atkCardBasePos;
@@ -99,41 +111,118 @@ namespace RhythmWitchClone.Gameplay
 
         private void Start()
         {
+            RefreshCharacterStats();
+            RefreshMusicSheets();
             _currentMana = maxMana;
 
             if (defCardTransform != null) _defCardBasePos = defCardTransform.anchoredPosition;
             if (atkCardTransform != null) _atkCardBasePos = atkCardTransform.anchoredPosition;
             if (spcCardTransform != null) _spcCardBasePos = spcCardTransform.anchoredPosition;
 
+            foreach (var card in new[] { defCardTransform, atkCardTransform, spcCardTransform })
+            {
+                if (card == null) continue;
+                _cardRotations[card] = card.localRotation;
+                _cardScales[card] = card.localScale;
+            }
             GenerateCardTexts();
         }
 
         /// <summary>
-        /// Baut den Beschreibungstext jeder Karte automatisch aus den hier eingestellten Werten
-        /// zusammen - änderst du z.B. Defense Damage Reduction, passt sich der Kartentext beim
-        /// nächsten Start automatisch mit an.
+        /// Applies persistent character stats without refilling mana or stacking bonuses.
         /// </summary>
+        public void RefreshCharacterStats()
+        {
+            var character = GetComponent<MainCharacter>();
+            if (character == null) return;
+            var stats = character.Stats;
+            maxMana = stats.maxMana;
+            manaRegenPerSecond = stats.manaRegeneration;
+            _currentMana = Mathf.Clamp(_currentMana, 0, maxMana);
+            UpdateManaBarUI();
+        }
+
+        public void RefreshMusicSheets()
+        {
+            var character = GetComponent<MainCharacter>();
+            if (character == null || character.musicSheets == null) return;
+            DeactivateCurrentCard();
+            _specialCardPulseTimer = 0;
+            _defSheet = character.GetEquippedSheet(MusicSheetClass.DEF);
+            _atkSheet = character.GetEquippedSheet(MusicSheetClass.ATK);
+            _spcSheet = character.GetEquippedSheet(MusicSheetClass.SPC);
+            ApplySheetArtwork(defCardTransform, _defSheet);
+            ApplySheetArtwork(atkCardTransform, _atkSheet);
+            ApplySheetArtwork(spcCardTransform, _spcSheet);
+            if (_spcSheet != null)
+            {
+                specialShockwaveRadius = _spcSheet.shockwaveRadius;
+                specialKnockbackForce = _spcSheet.knockbackForce;
+                specialStunDuration = _spcSheet.stunDuration;
+                specialShockwaveColor = _spcSheet.shockwaveColor;
+                specialShockwaveVisualDuration = _spcSheet.shockwaveVisualDuration;
+                specialCardPulseDuration = _spcSheet.selectionPulseDuration;
+            }
+            GenerateCardTexts();
+        }
+
+        private static void ApplySheetArtwork(RectTransform card, MusicSheetDefinition sheet)
+        {
+            if (card != null && sheet != null && sheet.artwork != null &&
+                card.TryGetComponent<Image>(out var artworkImage))
+                artworkImage.sprite = sheet.artwork;
+        }
+
+        private void OnDisable()
+        {
+            DeactivateCurrentCard();
+            _specialCardPulseTimer = 0;
+        }
+
+        private static void ShowCardDescription(TMP_Text text)
+        {
+            if (text == null) return;
+            text.gameObject.SetActive(true);
+            text.enabled = true;
+            text.raycastTarget = false;
+            text.color = new Color(0.22f, 0.16f, 0.11f, 1f);
+            text.alignment = TextAlignmentOptions.Center;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 16f;
+            text.fontSizeMax = 21f;
+            RectTransform rect = text.rectTransform;
+            rect.anchorMin = new Vector2(0.12f, 0.18f);
+            rect.anchorMax = new Vector2(0.88f, 0.78f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            rect.localScale = Vector3.one;
+            rect.localRotation = Quaternion.identity;
+        }
+
         private void GenerateCardTexts()
         {
+            ShowCardDescription(defCardText);
+            ShowCardDescription(atkCardText);
+            ShowCardDescription(spcCardText);
             if (defCardText != null)
             {
-                int reductionPercent = Mathf.RoundToInt(defenseDamageReduction * 100f);
+                int reductionPercent = Mathf.RoundToInt((_defSheet != null ? _defSheet.damageReduction : defenseDamageReduction) * 100f);
                 defCardText.text =
-                    $"-{reductionPercent}% Schaden\n" +
-                    $"+{defenseHealAmount} HP alle {defenseHealInterval:0.#}s";
+                    $"<b>Verteidigung</b>\n\n-{reductionPercent}% Schaden\n" +
+                    $"+{(_defSheet != null ? _defSheet.healingAmount : defenseHealAmount)} HP alle {(_defSheet != null ? _defSheet.healingInterval : defenseHealInterval):0.#}s";
             }
 
             if (atkCardText != null)
             {
                 atkCardText.text =
-                    $"+{attackDamageBonus} Schaden\n" +
-                    $"+{attackRadiusBonus:0.#} Reichweite";
+                    $"<b>Angriff</b>\n\n+{(_atkSheet != null ? _atkSheet.auraDamageBonus : attackDamageBonus)} Schaden\n" +
+                    $"+{(_atkSheet != null ? _atkSheet.auraRadiusBonus : attackRadiusBonus):0.#} Reichweite";
             }
 
             if (spcCardText != null)
             {
                 spcCardText.text =
-                    $"Stößt Gegner weg\n" +
+                    $"<b>Schockwelle</b>\n\nStößt Gegner weg\n" +
                     $"{specialStunDuration:0.#}s betäubt\n" +
                     $"(nur bei vollem Mana)";
             }
@@ -141,9 +230,14 @@ namespace RhythmWitchClone.Gameplay
 
         private void Update()
         {
+            if (_specialFeedbackTimer > 0f)
+            {
+                _specialFeedbackTimer -= Time.deltaTime;
+                if (_specialFeedbackTimer <= 0f && specialFeedbackText != null) specialFeedbackText.text = "";
+            }
             HandleCardInput();
             UpdateMana();
-            UpdateCardVisuals();
+            UpdateCardVisuals(Time.deltaTime);
             UpdateManaBarUI();
             UpdateDefenseHealing();
         }
@@ -154,9 +248,9 @@ namespace RhythmWitchClone.Gameplay
 
             if (Keyboard.current != null)
             {
-                if (Keyboard.current.digit1Key.wasPressedThisFrame) ToggleCard(0);
-                if (Keyboard.current.digit2Key.wasPressedThisFrame) ToggleCard(1);
-                if (Keyboard.current.digit3Key.wasPressedThisFrame) TriggerSpecialCard();
+                if (BindingPressed("Fähigkeit 1")) ToggleCard(0);
+                if (BindingPressed("Fähigkeit 2")) ToggleCard(1);
+                if (BindingPressed("Spezialfähigkeit")) TriggerSpecialCard();
             }
 
             if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
@@ -166,6 +260,12 @@ namespace RhythmWitchClone.Gameplay
                 else if (clickedCard == 1) ToggleCard(1);
                 else if (clickedCard == 2) TriggerSpecialCard();
             }
+        }
+
+        private static bool BindingPressed(string action)
+        {
+            Key key = RhythmancySettings.GetKeyForAction(action);
+            return key != Key.None && Keyboard.current[key].wasPressedThisFrame;
         }
 
         /// <summary>
@@ -211,12 +311,20 @@ namespace RhythmWitchClone.Gameplay
             }
 
             DeactivateCurrentCard();
+            _specialCardPulseTimer = 0;
             _activeCardIndex = cardIndex;
+            _activeSheet = cardIndex == 0 ? _defSheet : _atkSheet;
+            AudioManager.Instance?.SetSheetMusic(this, _activeSheet != null ? _activeSheet.selectedMusic : null);
             _defenseHealTimer = 0f;
 
             if (player == null) return;
 
-            if (cardIndex == 0) player.SetDamageReduction(defenseDamageReduction);
+            if (_activeSheet != null)
+            {
+                player.SetDamageReduction(_activeSheet.damageReduction);
+                player.SetAuraBonus(_activeSheet.auraDamageBonus, _activeSheet.auraRadiusBonus);
+            }
+            else if (cardIndex == 0) player.SetDamageReduction(defenseDamageReduction);
             else if (cardIndex == 1) player.SetAuraBonus(attackDamageBonus, attackRadiusBonus);
         }
 
@@ -224,11 +332,13 @@ namespace RhythmWitchClone.Gameplay
         {
             if (player != null)
             {
-                if (_activeCardIndex == 0) player.SetDamageReduction(0f);
-                else if (_activeCardIndex == 1) player.SetAuraBonus(0, 0f);
+                player.SetDamageReduction(0f);
+                player.SetAuraBonus(0, 0f);
             }
 
             _activeCardIndex = -1;
+            _activeSheet = null;
+            AudioManager.Instance?.ClearSheetMusic(this);
         }
 
         /// <summary>
@@ -238,12 +348,21 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         private void TriggerSpecialCard()
         {
-            if (_currentMana < maxMana) return; // nur bei komplett vollem Mana nutzbar
+            if (_currentMana < maxMana)
+            {
+                if (specialFeedbackText != null)
+                    specialFeedbackText.text = $"SPC braucht volles Mana ({Mathf.FloorToInt(100f * _currentMana / maxMana)} %).\nATK/DEF abwählen, um Mana zu laden.";
+                _specialFeedbackTimer = 3f;
+                return;
+            }
 
             DeactivateCurrentCard();
 
             _currentMana = 0f;
             _specialCardPulseTimer = specialCardPulseDuration;
+            AudioManager.Instance?.SetSheetMusic(this, _spcSheet != null ? _spcSheet.selectedMusic : null);
+            if (specialFeedbackText != null) specialFeedbackText.text = "Schockwelle!";
+            _specialFeedbackTimer = 1f;
 
             if (player != null)
             {
@@ -257,13 +376,15 @@ namespace RhythmWitchClone.Gameplay
         /// </summary>
         private void UpdateDefenseHealing()
         {
-            if (_activeCardIndex != 0 || player == null) return;
+            int healing = _activeSheet != null ? _activeSheet.healingAmount : (_activeCardIndex == 0 ? defenseHealAmount : 0);
+            float interval = _activeSheet != null ? _activeSheet.healingInterval : defenseHealInterval;
+            if (_activeCardIndex < 0 || healing <= 0 || player == null) return;
 
             _defenseHealTimer += Time.deltaTime;
-            if (_defenseHealTimer >= defenseHealInterval)
+            if (_defenseHealTimer >= Mathf.Max(.01f, interval))
             {
-                _defenseHealTimer -= defenseHealInterval;
-                player.Heal(defenseHealAmount);
+                _defenseHealTimer -= Mathf.Max(.01f, interval);
+                player.Heal(healing);
             }
         }
 
@@ -271,7 +392,7 @@ namespace RhythmWitchClone.Gameplay
         {
             if (_activeCardIndex == 0 || _activeCardIndex == 1)
             {
-                _currentMana = Mathf.Max(0f, _currentMana - manaDrainPerSecond * Time.deltaTime);
+                _currentMana = Mathf.Max(0f, _currentMana - (_activeSheet != null ? _activeSheet.manaDrainPerSecond : manaDrainPerSecond) * Time.deltaTime);
 
                 if (_currentMana <= 0f)
                 {
@@ -285,24 +406,40 @@ namespace RhythmWitchClone.Gameplay
             }
         }
 
-        private void UpdateCardVisuals()
+        private void UpdateCardVisuals(float deltaTime)
         {
             if (_specialCardPulseTimer > 0f)
             {
-                _specialCardPulseTimer -= Time.deltaTime;
+                _specialCardPulseTimer -= deltaTime;
+                if (_specialCardPulseTimer <= 0) AudioManager.Instance?.ClearSheetMusic(this);
             }
 
-            UpdateSingleCardVisual(defCardTransform, _defCardBasePos, _activeCardIndex == 0);
-            UpdateSingleCardVisual(atkCardTransform, _atkCardBasePos, _activeCardIndex == 1);
-            UpdateSingleCardVisual(spcCardTransform, _spcCardBasePos, _specialCardPulseTimer > 0f);
+            int front = _specialCardPulseTimer > 0f ? 2 : (_activeCardIndex >= 0 ? _activeCardIndex : 1);
+            if (_frontCard != front)
+            {
+                var cards = new[] { defCardTransform, atkCardTransform, spcCardTransform };
+                // Keep ATK above the remaining side sheet, as in the illustrated fan.
+                foreach (var card in new[] { spcCardTransform, defCardTransform, atkCardTransform })
+                    if (card != null) card.SetAsLastSibling();
+                if (cards[front] != null) cards[front].SetAsLastSibling();
+                _frontCard = front;
+            }
+            UpdateSingleCardVisual(defCardTransform, _defCardBasePos, _activeCardIndex == 0, deltaTime);
+            UpdateSingleCardVisual(atkCardTransform, _atkCardBasePos, _activeCardIndex == 1, deltaTime);
+            UpdateSingleCardVisual(spcCardTransform, _spcCardBasePos, _specialCardPulseTimer > 0f, deltaTime);
         }
 
-        private void UpdateSingleCardVisual(RectTransform cardTransform, Vector2 basePosition, bool isLifted)
+        private void UpdateSingleCardVisual(RectTransform cardTransform, Vector2 basePosition, bool isLifted, float deltaTime)
         {
             if (cardTransform == null) return;
 
             Vector2 targetPosition = basePosition + (isLifted ? Vector2.up * cardLiftDistance : Vector2.zero);
-            cardTransform.anchoredPosition = Vector2.Lerp(cardTransform.anchoredPosition, targetPosition, Time.deltaTime * cardLiftSpeed);
+            float blend = 1f - Mathf.Exp(-cardLiftSpeed * deltaTime);
+            cardTransform.anchoredPosition = Vector2.Lerp(cardTransform.anchoredPosition, targetPosition, blend);
+            if (_cardScales.TryGetValue(cardTransform, out Vector3 scale))
+                cardTransform.localScale = Vector3.Lerp(cardTransform.localScale, scale * (isLifted ? 1.18f : 1f), blend);
+            if (_cardRotations.TryGetValue(cardTransform, out Quaternion rotation))
+                cardTransform.localRotation = Quaternion.Slerp(cardTransform.localRotation, rotation, blend);
         }
 
         /// <summary>

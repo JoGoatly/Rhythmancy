@@ -1,0 +1,10 @@
+PASS
+Empty slots and Continue disabled
+SettingsPanel opens/back/fade
+AchievementsPanel opens/back/fade
+HelpPanel opens/back/fade
+CreditsPanel opens/back/fade
+Malformed file, delete/cancel/confirm
+New game/Tutorial, Escape pause, settings fade at timeScale 0, Resume preserves instance
+Three slots, overwrite cancellation, load confirmation, scene/health persisted
+New-game overwrite protection and Continue roundtrip
